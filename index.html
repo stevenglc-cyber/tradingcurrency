@@ -76,6 +76,7 @@
   .legend-badge.rong{background:rgba(2,132,199,0.12);color:#0284c7}
   .legend-badge.ema89{background:rgba(249,115,22,0.12);color:#ea580c}
   .legend-badge.ema200{background:rgba(168,85,247,0.12);color:#9333ea}
+  .legend-badge.ema610{background:rgba(225,29,72,0.12);color:#e11d48}
   .tv-main-chart{width:100%;height:380px;position:relative}
 
   .mau{background:var(--canh-nen);color:var(--canh);border-radius:8px;padding:10px 14px;font-size:14px}
@@ -207,6 +208,7 @@
         <span class="legend-badge rong">🐉 Dải Rồng: EMA 34 High / Close / Low</span>
         <span class="legend-badge ema89">⚡ EMA 89 (Xu Hướng)</span>
         <span class="legend-badge ema200">🛡️ EMA 200 (Cản Lớn)</span>
+        <span class="legend-badge ema610">👑 EMA 610 (Cản Siêu Cứng)</span>
         <span id="tvThongTinGia" class="legend-badge" style="background:var(--nen);color:var(--chu);font-family:var(--chu-so)"></span>
       </div>
       <div id="tradingview_main_container" class="tv-main-chart"></div>
@@ -243,7 +245,7 @@
     <ol>
       <li><b>Hệ thống Sonic R (Vũ Tiến):</b>
         • <b>Dải Rồng (Dragon):</b> Gồm 3 đường <b>EMA 34 High, EMA 34 Close, EMA 34 Low</b> (màu xanh dương). Nến nằm trên Dải Rồng = Ưu tiên MUA; nến nằm dưới Dải Rồng = Ưu tiên BÁN.<br>
-        • <b>Đường Xu Hướng:</b> <b>EMA 89</b> (đường màu cam) là ranh giới xu hướng quyết định. <b>EMA 200</b> (đường màu tím) đóng vai trò cản xu hướng lớn.
+        • <b>Đường Xu Hướng & Cản Lớn:</b> <b>EMA 89</b> (đường màu cam) là ranh giới xu hướng quyết định. <b>EMA 200</b> (đường màu tím) là cản xu hướng trung hạn. <b>EMA 610</b> (đường màu đỏ ruby) là cản dài hạn chu kỳ siêu lớn. Cả 3 khung <b>M15, H4, 1D</b> đều hiển thị đầy đủ trọn bộ 6 đường EMA Sonic R này!
       </li>
       <li><b>Chọn 5 cặp mạnh – yếu (MarketMilk Standard):</b>
         Chỉ tập trung vào 5 cặp tiềm năng nhất: đồng mạnh nhất ghép với 3 đồng yếu nhất, và đồng yếu nhất ghép với 3 đồng mạnh nhất. Luôn mua đồng mạnh, bán đồng yếu, và chỉ nhận mô hình nến cùng hướng sức mạnh tiền tệ. Sức mạnh đo % từ giá mở cửa ngày của sàn MT5. Trong 2 giờ đầu ngày, dùng sức mạnh của cả ngày hôm trước.
@@ -423,21 +425,18 @@ function veMainTradingView(tenCap){
   }
   sonicSeriesList = [];
 
-  // Nếu người dùng chọn khung M15 hoặc 1D (D1): Nhúng trực tiếp TradingView Interactive Chart
-  if(currentInterval !== '240'){
-    el.innerHTML = `
-      <div style="height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--mat)">
-        <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=FX%3A${symbolCode}&interval=${currentInterval}&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=EMA%40tv-basicstudies%1FEMA%40tv-basicstudies&theme=${isDark?'dark':'light'}&style=1&timezone=Asia%2FHo_Chi_Minh" 
-          style="width:100%;height:380px;border:none" allowtransparency="true" scrolling="no"></iframe>
-      </div>
-    `;
-    return;
+  // Lấy dữ liệu nến đa khung (M15 / H4 / 1D) từ data.json
+  const daKhungCap = duLieuGoc.da_khung && duLieuGoc.da_khung[tenCap];
+  const nenDaKhung = daKhungCap && daKhungCap[currentInterval];
+  if(nenDaKhung && nenDaKhung.length){
+    nen = nenDaKhung;
   }
 
+  // Nếu không có dữ liệu cho cặp này (ví dụ các cặp ngoài top 5 khi chọn M15/1D): Nhúng TradingView Interactive
   if(!nen || !nen.length){
     el.innerHTML = `
       <div style="height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--mat)">
-        <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=FX%3A${symbolCode}&interval=240&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=EMA%40tv-basicstudies%1FEMA%40tv-basicstudies&theme=${isDark?'dark':'light'}&style=1&timezone=Asia%2FHo_Chi_Minh" 
+        <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=FX%3A${symbolCode}&interval=${currentInterval}&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=EMA%40tv-basicstudies%1FEMA%40tv-basicstudies%1FEMA%40tv-basicstudies%1FEMA%40tv-basicstudies%1FEMA%40tv-basicstudies&theme=${isDark?'dark':'light'}&style=1&timezone=Asia%2FHo_Chi_Minh" 
           style="width:100%;height:380px;border:none" allowtransparency="true" scrolling="no"></iframe>
       </div>
     `;
@@ -495,6 +494,8 @@ function veMainTradingView(tenCap){
   }));
   currentCandleSeries.setData(nData);
 
+  const coSanEMA = nen[0] && nen[0].length >= 11;
+
   // DẢI RỒNG SONIC R (EMA 34 High, EMA 34 Close, EMA 34 Low)
   const ema34H = mainChart.addLineSeries({
     color: '#38bdf8',
@@ -503,16 +504,20 @@ function veMainTradingView(tenCap){
     title: 'EMA 34 H',
     visible: hienThiSonic
   });
-  ema34H.setData(tinhEMA(nen, 34, 'h'));
+  ema34H.setData(coSanEMA 
+    ? nen.filter(b => b[5] !== null).map(b => ({ time: b[0], value: b[5] }))
+    : tinhEMA(nen, 34, 'h'));
 
   const ema34C = mainChart.addLineSeries({
     color: '#0284c7',
-    lineWidth: 1.6,
+    lineWidth: 1.8,
     priceLineVisible: false,
     title: 'EMA 34 C',
     visible: hienThiSonic
   });
-  ema34C.setData(tinhEMA(nen, 34, 'c'));
+  ema34C.setData(coSanEMA 
+    ? nen.filter(b => b[6] !== null).map(b => ({ time: b[0], value: b[6] }))
+    : tinhEMA(nen, 34, 'c'));
 
   const ema34L = mainChart.addLineSeries({
     color: '#38bdf8',
@@ -521,9 +526,11 @@ function veMainTradingView(tenCap){
     title: 'EMA 34 L',
     visible: hienThiSonic
   });
-  ema34L.setData(tinhEMA(nen, 34, 'l'));
+  ema34L.setData(coSanEMA 
+    ? nen.filter(b => b[7] !== null).map(b => ({ time: b[0], value: b[7] }))
+    : tinhEMA(nen, 34, 'l'));
 
-  // ĐƯỜNG XU HƯỚNG SONIC R: EMA 89 & EMA 200
+  // ĐƯỜNG XU HƯỚNG SONIC R: EMA 89
   const ema89 = mainChart.addLineSeries({
     color: '#f97316',
     lineWidth: 2,
@@ -531,21 +538,40 @@ function veMainTradingView(tenCap){
     title: 'EMA 89',
     visible: hienThiSonic
   });
-  const data89 = tinhEMA(nen, 89, 'c');
+  const data89 = coSanEMA 
+    ? nen.filter(b => b[8] !== null).map(b => ({ time: b[0], value: b[8] }))
+    : tinhEMA(nen, 89, 'c');
   if(data89.length) ema89.setData(data89);
 
+  // CẢN TRUNG HẠN: EMA 200
   const ema200 = mainChart.addLineSeries({
     color: '#a855f7',
-    lineWidth: 1.5,
+    lineWidth: 1.8,
     lineStyle: LightweightCharts.LineStyle.Dashed,
     priceLineVisible: false,
     title: 'EMA 200',
     visible: hienThiSonic
   });
-  const data200 = tinhEMA(nen, 200, 'c');
+  const data200 = coSanEMA 
+    ? nen.filter(b => b[9] !== null).map(b => ({ time: b[0], value: b[9] }))
+    : tinhEMA(nen, 200, 'c');
   if(data200.length) ema200.setData(data200);
 
-  sonicSeriesList = [ema34H, ema34C, ema34L, ema89, ema200];
+  // CẢN SIÊU CỨNG DÀI HẠN: EMA 610
+  const ema610 = mainChart.addLineSeries({
+    color: '#e11d48',
+    lineWidth: 2.2,
+    lineStyle: LightweightCharts.LineStyle.Solid,
+    priceLineVisible: false,
+    title: 'EMA 610',
+    visible: hienThiSonic
+  });
+  const data610 = coSanEMA 
+    ? nen.filter(b => b[10] !== null).map(b => ({ time: b[0], value: b[10] }))
+    : tinhEMA(nen, 610, 'c');
+  if(data610.length) ema610.setData(data610);
+
+  sonicSeriesList = [ema34H, ema34C, ema34L, ema89, ema200, ema610];
 
   // Nếu cặp này có setup mô hình, kẻ đường Cắt Lỗ, Mục Tiêu
   if(dongInfo && dongInfo.cat_lo){

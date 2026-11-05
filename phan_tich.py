@@ -80,7 +80,7 @@ def lech_gio_san(ts):
 def lay_nen_gio(ten_cap):
     """Lấy nến 1 giờ trực tiếp từ Yahoo Finance."""
     url = (f"https://query1.finance.yahoo.com/v8/finance/chart/{ten_cap}=X"
-           "?interval=1h&range=1mo")
+           "?interval=1h&range=365d")
     for lan in range(3):
         try:
             req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
@@ -134,6 +134,88 @@ def tinh_atr(nen):
         atr[i] = a
     return atr
 
+
+
+def tinh_ema_list(bars, period, col):
+    """Tính EMA chuẩn mực. bars là list [t, o, h, l, c]. col: 1=o, 2=h, 3=l, 4=c."""
+    if len(bars) < period:
+        return [None] * len(bars)
+    k = 2.0 / (period + 1.0)
+    sma = sum(b[col] for b in bars[:period]) / period
+    res = [None] * (period - 1) + [sma]
+    prev = sma
+    for b in bars[period:]:
+        prev = (b[col] * k) + (prev * (1.0 - k))
+        res.append(prev)
+    return res
+
+
+def dong_goi_nen_kem_ema(bars, so_le=5, so_nen_lay=150):
+    """Tính toàn bộ bộ chỉ báo Sonic R chuẩn Vũ Tiến (EMA 34 High, Close, Low, EMA 89, EMA 200, EMA 610)
+    và đóng gói các nến gần nhất."""
+    if not bars:
+        return []
+    e34h = tinh_ema_list(bars, 34, 2)
+    e34c = tinh_ema_list(bars, 34, 4)
+    e34l = tinh_ema_list(bars, 34, 3)
+    e89 = tinh_ema_list(bars, 89, 4)
+    e200 = tinh_ema_list(bars, 200, 4)
+    e610 = tinh_ema_list(bars, 610, 4)
+
+    bat_dau = max(0, len(bars) - so_nen_lay)
+    kq = []
+    for idx in range(bat_dau, len(bars)):
+        b = bars[idx]
+        kq.append([
+            b[0],
+            round(b[1], so_le),
+            round(b[2], so_le),
+            round(b[3], so_le),
+            round(b[4], so_le),
+            round(e34h[idx], so_le) if e34h[idx] is not None else None,
+            round(e34c[idx], so_le) if e34c[idx] is not None else None,
+            round(e34l[idx], so_le) if e34l[idx] is not None else None,
+            round(e89[idx], so_le) if e89[idx] is not None else None,
+            round(e200[idx], so_le) if e200[idx] is not None else None,
+            round(e610[idx], so_le) if e610[idx] is not None else None,
+        ])
+    return kq
+
+
+def lay_nen_15m_va_1d(ten_cap, so_le=5):
+    """Lấy dữ liệu nến M15 và 1D (Daily) từ Yahoo Finance cho Sonic R."""
+    sym = ten_cap.replace('/', '')
+    kq = {"15": [], "D": []}
+    
+    # 1. Khung M15 (60 ngày ~ 5700 nến để tính EMA 610)
+    try:
+        url15 = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}=X?interval=15m&range=60d"
+        req = urllib.request.Request(url15, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            res15 = json.load(r)["chart"]["result"][0]
+        t15 = res15["timestamp"]
+        q15 = res15["indicators"]["quote"][0]
+        bars15 = [[t15[i], q15["open"][i], q15["high"][i], q15["low"][i], q15["close"][i]]
+                  for i in range(len(t15)) if q15["close"][i] is not None]
+        kq["15"] = dong_goi_nen_kem_ema(bars15, so_le, 150)
+    except Exception as e:
+        print(f"Lỗi lấy 15m {sym}: {e}")
+
+    # 2. Khung 1D (5 năm ~ 1300 nến để tính EMA 610)
+    try:
+        urld = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}=X?interval=1d&range=5y"
+        req = urllib.request.Request(urld, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            resd = json.load(r)["chart"]["result"][0]
+        td = resd["timestamp"]
+        qd = resd["indicators"]["quote"][0]
+        barsd = [[td[i], qd["open"][i], qd["high"][i], qd["low"][i], qd["close"][i]]
+                 for i in range(len(td)) if qd["close"][i] is not None]
+        kq["D"] = dong_goi_nen_kem_ema(barsd, so_le, 150)
+    except Exception as e:
+        print(f"Lỗi lấy 1d {sym}: {e}")
+
+    return kq
 
 def than(b): return abs(b["c"] - b["o"])
 def bien(b): return b["h"] - b["l"]
@@ -414,6 +496,36 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
     dat.sort(key=lambda d: -d["chenh"])
     theo_doi.sort(key=lambda d: -d["chenh"])
 
+    # Tạo kho dữ liệu đa khung (M15, H4, 1D) kèm trọn bộ Sonic R (EMA 34 H/C/L, 89, 200, 610)
+    da_khung = {}
+    cac_cap_can_lay = [d["cap"] for d in theo_doi[:5]]
+    for d in dat:
+        if d["cap"] not in cac_cap_can_lay:
+            cac_cap_can_lay.append(d["cap"])
+
+    print(f"Đang tải nến M15 và 1D kèm Sonic R cho {len(cac_cap_can_lay)} cặp theo dõi...")
+    for ten_cap in cac_cap_can_lay:
+        so = 3 if "JPY" in ten_cap else 5
+        parts = ten_cap.split('/')
+        if (parts[0], parts[1]) in [(TIEN[i], TIEN[j]) for (i, j) in CAP]:
+            ij = (TIEN.index(parts[0]), TIEN.index(parts[1]))
+        elif (parts[1], parts[0]) in [(TIEN[i], TIEN[j]) for (i, j) in CAP]:
+            ij = (TIEN.index(parts[1]), TIEN.index(parts[0]))
+        else:
+            continue
+        
+        if ij in tho:
+            da_dong, dang_chay = gop_nen_4_gio(tho[ij], bay_gio)
+            tat_ca = da_dong + dang_chay
+            h4_bars = [[b["dong"], b["o"], b["h"], b["l"], b["c"]] for b in tat_ca]
+            pack_h4 = dong_goi_nen_kem_ema(h4_bars, so, 150)
+            pack_m15_d1 = lay_nen_15m_va_1d(ten_cap, so)
+            da_khung[ten_cap] = {
+                "15": pack_m15_d1.get("15", []),
+                "240": pack_h4,
+                "D": pack_m15_d1.get("D", []),
+            }
+
     canh_bao = []
     for c in TIEN:
         mua = sum(1 for d in dat if (d["huong"] == "MUA" and d["goc"] == c) or (d["huong"] == "BÁN" and d["dinh"] == c))
@@ -430,7 +542,7 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
         "so_cap_doc_duoc": len(tho),
         "cach_do": cach_do,
         "suc_manh": [{"tien": TIEN[c], "phan_tram": round(suc_manh[c], 2)} for c in xep_hang],
-        "dat": dat, "loai": loai, "theo_doi": theo_doi, "tat_ca_nen": tat_ca_nen, "canh_bao": canh_bao,
+        "dat": dat, "loai": loai, "theo_doi": theo_doi, "tat_ca_nen": tat_ca_nen, "da_khung": da_khung, "canh_bao": canh_bao,
         "cai_dat": {"so_nen_dinh_day": SO_NEN_XET_DINH_DAY, "so_nen_gan_nhat": SO_NEN_GAN_NHAT_XET,
                     "so_nen_muc_tieu": SO_NEN_TIM_MUC_TIEU},
     }
