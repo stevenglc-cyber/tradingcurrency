@@ -59,6 +59,15 @@
   .chart-title-group{display:flex;flex-direction:column;gap:2px}
   .chart-subtitle{font-size:13px;color:var(--phu);font-weight:600}
   .chart-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .tf-btn-group{display:inline-flex;align-items:center;background:var(--nen);border:1px solid var(--vien);border-radius:8px;padding:2px;gap:2px}
+  .btn-tf{padding:5px 10px;font-size:12px;font-weight:700;border:none;border-radius:6px;background:transparent;color:var(--phu);cursor:pointer;transition:all 0.15s ease}
+  .btn-tf:hover{color:var(--chu);background:var(--table-hover)}
+  .btn-tf.active{background:var(--chinh);color:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.15)}
+  .btn-ai-nav{background:var(--ai-nen);color:var(--ai);border:1px solid var(--ai-vien);font-weight:700;font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all 0.15s ease}
+  .btn-ai-nav:hover{filter:brightness(0.95)}
+  .btn-ai-sm{padding:4px 8px;font-size:11px;font-weight:700;border-radius:6px;color:var(--ai);background:var(--ai-nen);border:1px solid var(--ai-vien);cursor:pointer;transition:all 0.15s ease}
+  .btn-ai-sm:hover{filter:brightness(0.95)}
+  .btn-group-thao-tac{display:inline-flex;align-items:center;gap:6px}
   .select-cap{font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--vien);background:var(--nen);color:var(--chu);cursor:pointer}
   .btn-toggle-sonic{font-size:12px;padding:6px 12px;border-radius:8px;background:var(--nen);color:var(--chinh);border:1px solid var(--vien);font-weight:600}
   .tv-main-box{width:100%;border-radius:10px;border:1px solid var(--vien);overflow:hidden;background:var(--nen);position:relative}
@@ -178,13 +187,18 @@
   <section class="khu-chart-chinh" id="khuChartChinh">
     <div class="chart-header">
       <div class="chart-title-group">
-        <h2 style="margin:0">📊 Biểu Đồ TradingView & Dải Rồng Sonic R (H4)</h2>
+        <h2 style="margin:0">📊 Biểu Đồ TradingView & Dải Rồng Sonic R</h2>
         <div class="chart-subtitle" id="tenCapDangXem">Đang tải biểu đồ…</div>
       </div>
       <div class="chart-controls">
-        <label for="chonCapTien" style="font-size:12px;font-weight:600;color:var(--phu)">Chọn cặp:</label>
+        <div class="tf-btn-group" title="Chọn khung thời gian phân tích">
+          <button type="button" class="btn-tf" id="tf_m15" onclick="doiKhungThoiGian('15', 'm15')">M15</button>
+          <button type="button" class="btn-tf active" id="tf_h4" onclick="doiKhungThoiGian('240', 'h4')">H4</button>
+          <button type="button" class="btn-tf" id="tf_d1" onclick="doiKhungThoiGian('D', 'd1')">1D</button>
+        </div>
         <select id="chonCapTien" class="select-cap" onchange="doiCapXem(this.value)"></select>
         <button id="nutToggleSonic" class="btn-toggle-sonic" type="button" onclick="toggleSonicR()">🐉 Dải Rồng: BẬT</button>
+        <button id="nutAIHeader" class="btn-ai-nav" type="button" onclick="moAITheoCap(capDangChon)">🏛️ Thẩm Định TradingAgents AI</button>
       </div>
     </div>
     
@@ -219,7 +233,7 @@
   <section>
     <h2>5 Cặp Mạnh – Yếu Đang Theo Dõi</h2>
     <div class="bang"><table>
-      <thead><tr><th>Cặp</th><th>Hướng</th><th>Chênh lệch sức mạnh</th><th>Mô hình nến đảo chiều</th><th>Biểu đồ Sonic R</th></tr></thead>
+      <thead><tr><th>Cặp</th><th>Hướng</th><th>Chênh lệch sức mạnh</th><th>Mô hình nến đảo chiều</th><th>Thao tác phân tích</th></tr></thead>
       <tbody id="loai"></tbody>
     </table></div>
   </section>
@@ -253,12 +267,21 @@
 </div>
 
 <script>
-let duLieuGoc = { dat: [], loai: [], tat_ca_nen: {} };
+let duLieuGoc = { dat: [], loai: [], theo_doi: [], tat_ca_nen: {} };
 let mainChart = null;
 let currentCandleSeries = null;
 let sonicSeriesList = [];
 let hienThiSonic = true;
 let capDangChon = "";
+let currentInterval = '240'; // '15', '240', 'D'
+
+function doiKhungThoiGian(interval, tfKey){
+  currentInterval = interval;
+  document.querySelectorAll('.btn-tf').forEach(b => b.classList.remove('active'));
+  const btn = $('tf_' + tfKey);
+  if(btn) btn.classList.add('active');
+  veMainTradingView(capDangChon);
+}
 
 const $=id=>document.getElementById(id);
 const so=v=>String(v).replace('.',',');
@@ -367,6 +390,11 @@ function veMainTradingView(tenCap){
   const el = $('tradingview_main_container');
   if(!el) return;
 
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || 
+                 (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.getAttribute('data-theme'));
+  const symbolCode = (tenCap || 'NZDUSD').replace('/', '');
+  const tfName = currentInterval === '15' ? '15 Phút (M15)' : (currentInterval === 'D' ? '1 Ngày (D1)' : '4 Giờ (H4)');
+
   // Tìm nến của cặp từ dat, theo_doi, loai hoặc tat_ca_nen
   let dongInfo = (duLieuGoc.dat || []).find(d => d.cap === tenCap) || 
                  (duLieuGoc.theo_doi || []).find(d => d.cap === tenCap) ||
@@ -384,9 +412,9 @@ function veMainTradingView(tenCap){
     const huongIcon = dongInfo.huong === 'MUA' ? '🟢' : '🔴';
     const mhText = dongInfo.mo_hinh || dongInfo.trang_thai || 'Chờ mô hình';
     const chenhVal = dongInfo.chenh !== undefined ? Math.abs(dongInfo.chenh) : 0;
-    $('tenCapDangXem').innerHTML = `<b>${tenCap}</b> · Khung 4 giờ (H4) · ${huongIcon} ${dongInfo.huong} · <i>${mhText}</i> · Chênh CSM: +${so(chenhVal.toFixed(2))}%`;
+    $('tenCapDangXem').innerHTML = `<b>${tenCap}</b> · Khung <b>${tfName}</b> · ${huongIcon} ${dongInfo.huong} · <i>${mhText}</i> · Chênh CSM: +${so(chenhVal.toFixed(2))}%`;
   } else {
-    $('tenCapDangXem').innerHTML = `<b>${tenCap}</b> · Khung 4 giờ (H4) · Dải Rồng Sonic R`;
+    $('tenCapDangXem').innerHTML = `<b>${tenCap}</b> · Khung <b>${tfName}</b> · Dải Rồng Sonic R (EMA 34/89/200)`;
   }
 
   if(mainChart){
@@ -395,12 +423,21 @@ function veMainTradingView(tenCap){
   }
   sonicSeriesList = [];
 
-  if(!nen || !nen.length){
-    // Nếu chưa có nến (ví dụ data.json cũ chưa nạp đủ), nhúng TradingView Widget iframe dự phòng ngay lập tức!
-    const symbolCode = tenCap.replace('/', '');
+  // Nếu người dùng chọn khung M15 hoặc 1D (D1): Nhúng trực tiếp TradingView Interactive Chart
+  if(currentInterval !== '240'){
     el.innerHTML = `
       <div style="height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--mat)">
-        <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=FX%3A${symbolCode}&interval=240&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=EMA%40tv-basicstudies%1FEMA%40tv-basicstudies&theme=${document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light'}&style=1&timezone=Asia%2FHo_Chi_Minh" 
+        <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=FX%3A${symbolCode}&interval=${currentInterval}&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=EMA%40tv-basicstudies%1FEMA%40tv-basicstudies&theme=${isDark?'dark':'light'}&style=1&timezone=Asia%2FHo_Chi_Minh" 
+          style="width:100%;height:380px;border:none" allowtransparency="true" scrolling="no"></iframe>
+      </div>
+    `;
+    return;
+  }
+
+  if(!nen || !nen.length){
+    el.innerHTML = `
+      <div style="height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--mat)">
+        <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=FX%3A${symbolCode}&interval=240&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=EMA%40tv-basicstudies%1FEMA%40tv-basicstudies&theme=${isDark?'dark':'light'}&style=1&timezone=Asia%2FHo_Chi_Minh" 
           style="width:100%;height:380px;border:none" allowtransparency="true" scrolling="no"></iframe>
       </div>
     `;
@@ -578,7 +615,13 @@ function veSucManh(ds){
 
 function veLenh(ds){
   if(!ds.length){
-    $('lenh').innerHTML='<div class="trong">Trong 5 cặp mạnh – yếu, chưa cặp nào có mô hình nến đảo chiều đúng hướng. Chờ nến tiếp theo.<br>👉 Anh hãy bấm nút <b>📊 Soi Chart</b> ở bảng 5 cặp theo dõi bên dưới để soi cấu trúc và Dải Rồng Sonic R!</div>';
+    $('lenh').innerHTML=`<div class="trong">
+      Trong 5 cặp mạnh – yếu, chưa cặp nào có mô hình nến đảo chiều đúng hướng. Chờ nến tiếp theo.<br>
+      👉 Anh hãy bấm nút <b>📊 Soi Chart</b> hoặc <b>🤖 Thẩm Định AI</b> ở bảng 5 cặp bên dưới để soi chi tiết từng cặp!
+      <div style="margin-top:12px">
+        <button class="btn-ai" style="display:inline-flex;max-width:320px" type="button" onclick="moAITheoCap(capDangChon)">🏛️ Xem Thẩm Định AI Cặp Đang Xem (${capDangChon || 'NZD/USD'})</button>
+      </div>
+    </div>`;
     return;
   }
 
@@ -626,7 +669,12 @@ function veLoai(ds){
       <td>${badge}</td>
       <td>${chenhHtml}</td>
       <td>${ttHtml}</td>
-      <td><button class="btn-soi" type="button" onclick="soiCap('${d.cap}')">📊 Soi Chart</button></td>
+      <td>
+        <div class="btn-group-thao-tac">
+          <button class="btn-soi" type="button" onclick="soiCap('${d.cap}')">📊 Soi Chart</button>
+          <button class="btn-ai-sm" type="button" onclick="moAITheoCap('${d.cap}')">🤖 Thẩm Định AI</button>
+        </div>
+      </td>
     </tr>`;
   }).join('');
 }
@@ -657,52 +705,87 @@ function capNhatDanhSachChon(){
   sel.value = capDangChon;
 }
 
-// Modal Thẩm Định TradingAgents AI
-function moAI(k){
-  const d = duLieuGoc.dat[k];
-  if(!d) return;
-  const isMua = d.huong === 'MUA';
-  $('modalTieuDe').innerHTML = `🏛️ Thẩm Định TradingAgents AI: <span style="color:${isMua?'var(--mua)':'var(--ban)'}">${d.huong} ${d.cap}</span>`;
+// Modal Thẩm Định TradingAgents AI theo cặp tiền bất kỳ
+function moAITheoCap(tenCap){
+  if(!tenCap) tenCap = capDangChon || "NZD/USD";
+  let d = (duLieuGoc.dat || []).find(x => x.cap === tenCap) ||
+          (duLieuGoc.theo_doi || []).find(x => x.cap === tenCap) ||
+          (duLieuGoc.loai || []).find(x => x.cap === tenCap);
+
+  const parts = tenCap.split('/');
+  const goc = parts[0] || 'EUR';
+  const dinh = parts[1] || 'USD';
+  
+  let huong = 'MUA';
+  let chenh = 0.35;
+  let mo_hinh = 'Chờ mô hình nến H4 xác nhận';
+  let cat_lo = 'Ngoài râu nến cực trị + 0.1 ATR';
+  let muc_tieu = 'Đỉnh/đáy 20 nến H4';
+  let loi_lo = 1.5;
+  let gia_cho = null;
+  let gia_hien_tai = 'Theo giá thị trường';
+
+  if(d){
+    huong = d.huong || 'MUA';
+    chenh = d.chenh !== undefined ? Math.abs(d.chenh) : 0.35;
+    mo_hinh = d.mo_hinh || d.trang_thai || 'Chờ mô hình nến H4';
+    if(d.cat_lo) cat_lo = d.cat_lo;
+    if(d.muc_tieu) muc_tieu = d.muc_tieu;
+    if(d.loi_lo) loi_lo = d.loi_lo;
+    if(d.gia_cho) gia_cho = d.gia_cho;
+    if(d.gia) gia_hien_tai = d.gia;
+  }
+
+  const isMua = huong === 'MUA';
+  const dongManh = isMua ? goc : dinh;
+  const dongYeu = isMua ? dinh : goc;
+
+  $('modalTieuDe').innerHTML = `🏛️ Thẩm Định TradingAgents AI: <span style="color:${isMua?'var(--mua)':'var(--ban)'}">${huong} ${tenCap}</span>`;
   
   $('modalNoiDung').innerHTML = `
     <div class="agent-card">
       <h4>🏛️ 1. Tác Tử Vĩ Mô & Ngân Hàng Trung Ương (Macro News Agent)</h4>
-      <p><b>Đồng tiền liên quan:</b> ${d.goc} và ${d.dinh}.<br>
-      • Chênh lệch sức mạnh dòng tiền: <b>${d.chenh > 0 ? '+' : ''}${so(d.chenh)}%</b> ủng hộ vị thế ${d.huong}.<br>
-      • <b>Khuyến cáo tin tức:</b> Luôn kiểm tra Forex Factory trước khi kích hoạt. Nếu có tin lãi suất, CPI hoặc Non-Farm trong vòng 4 giờ tới, tạm hoãn vào lệnh để tránh quét râu nến.</p>
+      <p>• <b>Cặp tiền:</b> ${tenCap} | Đồng mạnh: <b>${dongManh}</b> vs Đồng yếu: <b>${dongYeu}</b>.<br>
+      • <b>Sức mạnh dòng tiền (CSM):</b> Chênh lệch <b>+${so(chenh.toFixed(2))}%</b> xác nhận dòng vốn đang ưu tiên chảy vào đồng <b>${dongManh}</b> và rút khỏi <b>${dongYeu}</b>.<br>
+      • <b>Khuyến cáo tin tức:</b> Luôn kiểm tra Forex Factory trước khi vào lệnh. Nếu có tin đỏ (CPI, Lãi suất, Non-Farm) của ${goc} hoặc ${dinh} trong 4 giờ tới, tạm hoãn vào lệnh để tránh bão giá.</p>
     </div>
 
     <div class="agent-card">
-      <h4>🐉 2. Tác Tử Kỹ Thuật Đa Khung & Hệ Thống Sonic R (Multi-TF & Sonic R Agent)</h4>
-      <p>• <b>Khung H4:</b> Xuất hiện cụm nến <i>${d.mo_hinh}</i> tại vị trí cực trị 12 nến H4. Điểm cắt lỗ ngoài mô hình tại <b>${d.cat_lo}</b>.<br>
-      • <b>Đối chiếu Dải Rồng Sonic R:</b> Kiểm tra vị trí nến so với Dải Rồng EMA 34 (High/Close/Low) và đường xu hướng EMA 89. Điểm vào lệnh chuẩn đẹp nhất là khi giá test lại dải rồng hoặc vượt qua EMA 89 thuận theo sức mạnh CSM.<br>
-      • <b>Khung M15:</b> Chờ xác nhận tạo cấu trúc đảo chiều vi mô (CHoCH / đáy sau cao hơn đối với Mua).</p>
+      <h4>🐉 2. Tác Tử Kỹ Thuật Đa Khung M15 / H4 / D1 & Sonic R (Multi-TF Agent)</h4>
+      <p>• <b>Khung D1 (Xu hướng lớn):</b> Soi cản lớn <b>EMA 200</b>. Nếu giá D1 nằm trên EMA 200 thì củng cố vị thế MUA; nằm dưới EMA 200 củng cố vị thế BÁN.<br>
+      • <b>Khung H4 (Chủ đạo):</b> Trạng thái nến: <b>${mo_hinh}</b>. Đối chiếu với <b>Dải Rồng Sonic R (EMA 34 High/Close/Low)</b> và <b>EMA 89</b>: Vị thế an toàn nhất là khi giá test lại Dải Rồng hoặc bứt phá EMA 89 thuận chiều CSM.<br>
+      • <b>Khung M15 (Điểm vào vi mô):</b> Bấm chọn nút <b>M15</b> ở biểu đồ phía trên để soi cấu trúc nến vi mô (CHoCH, nến rút chân) trước khi xuống tiền.</p>
     </div>
 
     <div class="debate-grid">
       <div class="bull-card">
         <h4>🟢 Luận Điểm Phe Mua (Bull Case)</h4>
-        <p>• Dòng tiền CSM đo lường định lượng xác nhận ${isMua ? d.goc : d.dinh} đang có sức mua áp đảo.<br>
-        • Cụm nến đảo chiều hình thành tại vùng hỗ trợ/đáy vững chắc.<br>
-        • Tỷ lệ R:R hướng tới mục tiêu đỉnh/đáy 20 nến đạt mức hấp dẫn.</p>
+        <p>• Dòng tiền CSM đo lường định lượng xác nhận ${isMua ? goc : dinh} đang có lực mua vượt trội.<br>
+        • Giá đang giữ vững trên vùng hỗ trợ/Dải Rồng Sonic R.<br>
+        • Mục tiêu lợi nhuận hướng tới đỉnh cũ 20 nến đạt R:R $\ge$ 1:1,5.</p>
       </div>
       <div class="bear-card">
         <h4>🔴 Phản Biện Phe Bán (Bear Risks)</h4>
-        <p>• Cảnh báo bẫy thanh khoản (Liquidity sweep) nếu thị trường giật quét qua râu nến.<br>
-        • Rủi ro phân kỳ RSI hoặc khối lượng giao dịch suy giảm trong các phiên giao dịch giáp phiên Mỹ.<br>
-        • Cần tuân thủ tuyệt đối mức dừng lỗ tại ${d.cat_lo}.</p>
+        <p>• Cảnh giác bẫy thanh khoản quét râu 2 đầu (Liquidity Sweep) tại các vùng đỉnh/đáy.<br>
+        • Nếu giá phá vỡ mức Cắt lỗ ${cat_lo}, kịch bản đảo chiều bị hủy bỏ ngay lập tức.</p>
       </div>
     </div>
 
     <div class="cio-card">
-      <h4>⚖️ 3. Phê Duyệt & Quản Trị Rủi Ro (CIO Agent Decision)</h4>
-      <p>• <b>Phương thức vào lệnh:</b> ${d.gia_cho ? `<b>ĐẶT LỆNH CHỜ (LIMIT) tại ${d.gia_cho}</b> (để bảo đảm tỷ lệ R:R đạt 1:1,5)` : `<b>VÀO LỆNH NGAY (MARKET) tại ${d.gia}</b>`}<br>
-      • <b>Cắt lỗ (SL):</b> ${d.cat_lo} | <b>Mục tiêu (TP):</b> ${d.muc_tieu}<br>
-      • <b>Tỷ lệ Lời/Lỗ (R:R):</b> 1 : ${so(d.loi_lo)}<br>
-      • <b>Khối lượng:</b> Tối đa 1% rủi ro tài khoản. Nếu đang nắm giữ các cặp khác chứa đồng ${isMua ? d.goc : d.dinh}, hãy giảm 50% khối lượng (Split Lot).</p>
+      <h4>🛡️ 3. Phê Duyệt & Quản Trị Rủi Ro (CIO Agent Decision)</h4>
+      <p>• <b>Phương thức vào lệnh:</b> ${gia_cho ? `<b>ĐẶT LỆNH CHỜ (LIMIT) tại ${gia_cho}</b> (để đạt tỷ lệ R:R $\ge$ 1:1,5)` : `<b>VÀO LỆNH (MARKET) quanh ${gia_hien_tai}</b>`}<br>
+      • <b>Cắt lỗ (SL):</b> ${cat_lo} | <b>Mục tiêu (TP):</b> ${muc_tieu}<br>
+      • <b>Tỷ lệ Lời/Lỗ (R:R):</b> 1 : ${so(loi_lo)}<br>
+      • <b>Quy tắc phân bổ vốn:</b> Tối đa <b>1% rủi ro tài khoản</b>. Nếu danh mục đang có lệnh khác chứa đồng ${isMua ? goc : dinh}, bắt buộc chia đôi khối lượng (Split Lot) để kiểm soát rủi ro danh mục.</p>
     </div>
   `;
   $('modalAI').classList.add('open');
+}
+
+function moAI(k){
+  if(duLieuGoc.dat && duLieuGoc.dat[k]){
+    moAITheoCap(duLieuGoc.dat[k].cap);
+  }
 }
 
 function dongAI(e){
