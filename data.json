@@ -1,41 +1,41 @@
 {
- "cap_nhat": "15:29 05/11/2026",
- "nen_4_gio_dong": "13:00 05/11",
- "ma_nen": 1793858400,
+ "cap_nhat": "17:04 05/11/2026",
+ "nen_4_gio_dong": "17:00 05/11",
+ "ma_nen": 1793872800,
  "so_cap_doc_duoc": 28,
  "cach_do": "từ giá mở cửa ngày",
  "suc_manh": [
   {
    "tien": "NZD",
-   "phan_tram": 0.17
+   "phan_tram": 0.23
   },
   {
    "tien": "CAD",
-   "phan_tram": 0.08
-  },
-  {
-   "tien": "EUR",
-   "phan_tram": 0.05
+   "phan_tram": 0.13
   },
   {
    "tien": "AUD",
-   "phan_tram": 0.01
+   "phan_tram": 0.03
+  },
+  {
+   "tien": "EUR",
+   "phan_tram": -0.0
   },
   {
    "tien": "JPY",
-   "phan_tram": -0.01
-  },
-  {
-   "tien": "CHF",
-   "phan_tram": -0.07
-  },
-  {
-   "tien": "GBP",
-   "phan_tram": -0.1
+   "phan_tram": -0.03
   },
   {
    "tien": "USD",
+   "phan_tram": -0.06
+  },
+  {
+   "tien": "GBP",
    "phan_tram": -0.13
+  },
+  {
+   "tien": "CHF",
+   "phan_tram": -0.16
   }
  ],
  "dat": [],
@@ -45,13 +45,13 @@
    "goc": "NZD",
    "dinh": "USD",
    "huong": "BÁN",
-   "mo_hinh": "sao băng",
-   "gio_nen": "13:00 05/11",
-   "chenh": -0.3,
-   "gia": 0.56389,
-   "cat_lo": 0.56613,
+   "mo_hinh": "nhấn chìm giảm",
+   "gio_nen": "17:00 05/11",
+   "chenh": -0.29,
+   "gia": 0.56379,
+   "cat_lo": 0.56612,
    "muc_tieu": 0.55832,
-   "loi_lo": 2.5,
+   "loi_lo": 2.4,
    "so_le": 5,
    "ly_do": "Sức mạnh ngày ngược chiều mô hình"
   },
@@ -62,11 +62,11 @@
    "huong": "BÁN",
    "mo_hinh": "sao băng",
    "gio_nen": "09:00 05/11",
-   "chenh": -0.12,
-   "gia": 0.9176,
+   "chenh": -0.16,
+   "gia": 0.91792,
    "cat_lo": 0.92043,
    "muc_tieu": 0.91262,
-   "loi_lo": 1.8,
+   "loi_lo": 2.1,
    "so_le": 5,
    "ly_do": "Sức mạnh ngày ngược chiều mô hình"
   },
@@ -76,42 +76,27 @@
    "dinh": "CAD",
    "huong": "BÁN",
    "mo_hinh": "sao băng",
-   "gio_nen": "13:00 05/11",
-   "chenh": -0.09,
-   "gia": 0.78624,
+   "gio_nen": "17:00 05/11",
+   "chenh": -0.11,
+   "gia": 0.78633,
    "cat_lo": 0.78946,
    "muc_tieu": 0.78069,
-   "loi_lo": 1.7,
+   "loi_lo": 1.8,
    "so_le": 5,
    "ly_do": "Sức mạnh ngày ngược chiều mô hình"
   },
   {
-   "cap": "CAD/JPY",
-   "goc": "CAD",
-   "dinh": "JPY",
+   "cap": "AUD/USD",
+   "goc": "AUD",
+   "dinh": "USD",
    "huong": "BÁN",
    "mo_hinh": "sao băng",
-   "gio_nen": "05:00 05/11",
-   "chenh": -0.09,
-   "gia": 113.4,
-   "cat_lo": 113.692,
-   "muc_tieu": 112.74,
-   "loi_lo": 2.3,
-   "so_le": 3,
-   "ly_do": "Sức mạnh ngày ngược chiều mô hình"
-  },
-  {
-   "cap": "AUD/CHF",
-   "goc": "AUD",
-   "dinh": "CHF",
-   "huong": "BÁN",
-   "mo_hinh": "nhấn chìm giảm",
-   "gio_nen": "05:00 05/11",
-   "chenh": -0.08,
-   "gia": 0.57239,
-   "cat_lo": 0.57469,
-   "muc_tieu": 0.5655,
-   "loi_lo": 3.0,
+   "gio_nen": "17:00 05/11",
+   "chenh": -0.1,
+   "gia": 0.70146,
+   "cat_lo": 0.70287,
+   "muc_tieu": 0.69589,
+   "loi_lo": 3.9,
    "so_le": 5,
    "ly_do": "Sức mạnh ngày ngược chiều mô hình"
   },
@@ -122,11 +107,11 @@
    "huong": "BÁN",
    "mo_hinh": "nhấn chìm giảm",
    "gio_nen": "13:00 05/11",
-   "chenh": 0.07,
-   "gia": 0.97844,
+   "chenh": 0.09,
+   "gia": 0.97824,
    "cat_lo": 0.98161,
    "muc_tieu": 0.97045,
-   "loi_lo": 2.5,
+   "loi_lo": 2.3,
    "so_le": 5,
    "ly_do": "Chênh lệch sức mạnh quá nhỏ"
   }
