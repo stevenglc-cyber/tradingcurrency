@@ -8,6 +8,7 @@ Quét 28 cặp tiền tệ theo phương pháp của Tú Trading Systems:
 Kết quả ghi ra data.json cho trang web đọc.
 Khi có nến 4 giờ mới đóng, gửi báo cáo về Telegram.
 """
+import io
 import json
 import os
 import subprocess
@@ -19,6 +20,11 @@ import urllib.parse
 import urllib.request
 from datetime import datetime, timedelta, timezone, tzinfo
 from zoneinfo import ZoneInfo
+
+# Đảm bảo mã hóa UTF-8 khi in log ra màn hình console (đặc biệt trên Windows)
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
+    sys.stderr.reconfigure(encoding='utf-8')
 
 # ---------------- Cài đặt (sửa ở đây nếu muốn) ----------------
 SO_NEN_XET_DINH_DAY = 12    # Mô hình phải nằm ở đỉnh/đáy của bao nhiêu nến 4 giờ gần nhất
@@ -287,19 +293,27 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
 
     dat, loai = [], []
     nen_dong_moi_nhat = 0
+    tat_ca_nen = {}
     for (i, j), nen in tho.items():
+        ten_cap_goc = f"{TIEN[i]}/{TIEN[j]}"
         da_dong, dang_chay = gop_nen_4_gio(nen, bay_gio)
         if da_dong:
             nen_dong_moi_nhat = max(nen_dong_moi_nhat, da_dong[-1]["dong"])
+        so = 3 if TIEN[j] == "JPY" else 5
+        tat_ca = da_dong + dang_chay
+        bat_dau = max(0, len(tat_ca) - SO_NEN_TREN_BIEU_DO)
+        danh_sach_nen = [[b["dong"], round(b["o"], so), round(b["h"], so), round(b["l"], so), round(b["c"], so)]
+                         for b in tat_ca[bat_dau:]]
+        tat_ca_nen[ten_cap_goc] = danh_sach_nen
+
         gia = nen[-1][4]
         th = quet_mo_hinh(da_dong, dang_chay, gia)
         if not th:
             continue
-        so = 3 if TIEN[j] == "JPY" else 5
         rui_ro = abs(gia - th["cat_lo"])
         chenh = suc_manh[i] - suc_manh[j] if th["huong"] == 1 else suc_manh[j] - suc_manh[i]
         dong = {
-            "cap": f"{TIEN[i]}/{TIEN[j]}", "goc": TIEN[i], "dinh": TIEN[j],
+            "cap": ten_cap_goc, "goc": TIEN[i], "dinh": TIEN[j],
             "huong": "MUA" if th["huong"] == 1 else "BÁN",
             "mo_hinh": th["mo_hinh"], "gio_nen": th["gio_nen"],
             "chenh": round(chenh, 2),
@@ -311,11 +325,7 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
             gia_cho = (th["muc_tieu"] + 1.5 * th["cat_lo"]) / 2.5
             if (th["huong"] == 1 and th["cat_lo"] < gia_cho < gia) or (th["huong"] == -1 and gia < gia_cho < th["cat_lo"]):
                 dong["gia_cho"] = round(gia_cho, so)
-        # Nến 4 giờ gần nhất để vẽ biểu đồ (gồm cả nến đang chạy)
-        tat_ca = da_dong + dang_chay
-        bat_dau = max(0, len(tat_ca) - SO_NEN_TREN_BIEU_DO)
-        dong["nen"] = [[b["dong"], round(b["o"], so), round(b["h"], so), round(b["l"], so), round(b["c"], so)]
-                       for b in tat_ca[bat_dau:]]
+        dong["nen"] = danh_sach_nen
         dong["chi_so_mh"] = th["chi_so"] - bat_dau
         dong["so_le"] = so
         dong["so_nen_mh"] = th["so_nen"]
@@ -324,8 +334,7 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
         else:
             dong["ly_do"] = ("Sức mạnh ngày ngược chiều mô hình" if chenh < 0
                              else "Chênh lệch sức mạnh quá nhỏ")
-            for khoa in ("nen", "chi_so_mh", "so_nen_mh"):
-                dong.pop(khoa, None)
+            # Giữ lại nến và mô hình để trader có thể soi biểu đồ TradingView của các cặp bị loại
             loai.append(dong)
     dat.sort(key=lambda d: -d["chenh"])
     loai.sort(key=lambda d: d["chenh"])
@@ -347,7 +356,7 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
         "so_cap_doc_duoc": len(tho),
         "cach_do": cach_do,
         "suc_manh": [{"tien": TIEN[c], "phan_tram": round(suc_manh[c], 2)} for c in xep_hang],
-        "dat": dat, "loai": loai, "canh_bao": canh_bao,
+        "dat": dat, "loai": loai, "tat_ca_nen": tat_ca_nen, "canh_bao": canh_bao,
         "cai_dat": {"so_nen_dinh_day": SO_NEN_XET_DINH_DAY, "so_nen_gan_nhat": SO_NEN_GAN_NHAT_XET,
                     "chenh_toi_thieu": CHENH_LECH_TOI_THIEU, "so_nen_muc_tieu": SO_NEN_TIM_MUC_TIEU},
     }

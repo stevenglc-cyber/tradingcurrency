@@ -34,7 +34,7 @@
   *{box-sizing:border-box}
   body{background:var(--nen);color:var(--chu);font-family:var(--chu-ui);font-size:15px;line-height:1.55;
     padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;margin:0}
-  main{max-width:920px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
+  main{max-width:940px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
   h1{font-size:24px;font-weight:700;margin:0;letter-spacing:-.01em;text-wrap:balance}
   h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--phu);margin:0 0 12px}
   .so{font-family:var(--chu-so);font-variant-numeric:tabular-nums}
@@ -52,6 +52,22 @@
   .dh-time{font-size:24px;font-weight:700;color:var(--chinh);letter-spacing:0.05em;display:flex;align-items:center;gap:6px}
   .dh-val{font-size:13px;color:var(--chu)}
   .tag-gmt{background:var(--nen);border:1px solid var(--vien);padding:2px 7px;border-radius:6px;font-size:11px;font-weight:600;color:var(--phu)}
+
+  /* TRẠM BIỂU ĐỒ TRADINGVIEW CHÍNH */
+  .khu-chart-chinh{background:var(--mat);border:1px solid var(--vien);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:12px;box-shadow:0 2px 12px rgba(0,0,0,0.04)}
+  .chart-header{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+  .chart-title-group{display:flex;flex-direction:column;gap:2px}
+  .chart-subtitle{font-size:13px;color:var(--phu);font-weight:600}
+  .chart-controls{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .select-cap{font:inherit;font-size:13px;font-weight:600;padding:6px 12px;border-radius:8px;border:1px solid var(--vien);background:var(--nen);color:var(--chu);cursor:pointer}
+  .btn-toggle-sonic{font-size:12px;padding:6px 12px;border-radius:8px;background:var(--nen);color:var(--chinh);border:1px solid var(--vien);font-weight:600}
+  .tv-main-box{width:100%;border-radius:10px;border:1px solid var(--vien);overflow:hidden;background:var(--nen);position:relative}
+  .tv-legend-bar{padding:8px 12px;background:var(--mat);border-bottom:1px solid var(--vien);display:flex;flex-wrap:wrap;align-items:center;gap:10px;font-size:12px}
+  .legend-badge{display:inline-flex;align-items:center;gap:5px;padding:2px 8px;border-radius:6px;font-size:11px;font-weight:600}
+  .legend-badge.rong{background:rgba(2,132,199,0.12);color:#0284c7}
+  .legend-badge.ema89{background:rgba(249,115,22,0.12);color:#ea580c}
+  .legend-badge.ema200{background:rgba(168,85,247,0.12);color:#9333ea}
+  .tv-main-chart{width:100%;height:380px;position:relative}
 
   .mau{background:var(--canh-nen);color:var(--canh);border-radius:8px;padding:10px 14px;font-size:14px}
   .sm{display:grid;grid-template-columns:44px 1fr 1fr 64px;gap:8px 6px;align-items:center;background:var(--mat);border:1px solid var(--vien);border-radius:12px;padding:14px}
@@ -72,15 +88,6 @@
   .cs div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--vien);padding-bottom:4px}
   .cs span:first-child{color:var(--phu)}
   .cho{background:var(--canh-nen);color:var(--canh);font-size:13px;border-radius:8px;padding:8px 12px}
-  
-  /* Khung Biểu Đồ TradingView Lightweight Charts */
-  .tv-box{width:100%;border-radius:10px;border:1px solid var(--vien);overflow:hidden;background:var(--mat);position:relative}
-  .tv-chart{width:100%;height:270px;position:relative}
-  .tv-legend{position:absolute;top:6px;left:8px;z-index:5;display:flex;flex-wrap:wrap;gap:6px;font-size:11px;font-family:var(--chu-so);pointer-events:none}
-  .tv-legend-item{background:rgba(0,0,0,0.65);color:#fff;padding:2px 6px;border-radius:4px;backdrop-filter:blur(2px)}
-  .tv-actions{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;background:var(--nen);border-bottom:1px solid var(--vien);font-size:12px}
-  .sonic-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;color:#0284c7}
-  .btn-sm{padding:4px 8px;font-size:12px;border-radius:6px}
 
   .btn-ai{background:var(--ai-nen);color:var(--ai);border:1px solid var(--ai-vien);font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:8px;width:100%;margin-top:2px}
   .btn-ai:hover{filter:brightness(0.95)}
@@ -89,7 +96,7 @@
   
   /* Bảng Mô Hình Bị Loại & Badges */
   .bang{overflow-x:auto;background:var(--mat);border:1px solid var(--vien);border-radius:12px}
-  table{border-collapse:collapse;width:100%;font-size:13px;min-width:560px}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:620px}
   th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--vien);vertical-align:middle}
   th{color:var(--phu);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.04em}
   tr:last-child td{border-bottom:none}
@@ -106,6 +113,8 @@
   .chenh-duong{color:var(--mua);font-weight:600}
   .chenh-am{color:var(--ban);font-weight:600}
   .lydo-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;background:var(--nen);color:var(--phu);border:1px solid var(--vien)}
+  .btn-soi{padding:4px 10px;font-size:12px;font-weight:600;border-radius:6px;color:var(--chinh);background:var(--nen);border:1px solid var(--vien)}
+  .btn-soi:hover{background:var(--vien)}
 
   .cach{color:var(--phu);font-size:14px;max-width:70ch}
   .cach ol{padding-left:20px;margin:6px 0}
@@ -116,7 +125,6 @@
   .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.65);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:999;opacity:0;pointer-events:none;transition:opacity 0.2s ease}
   .modal-overlay.open{opacity:1;pointer-events:auto}
   .modal-box{background:var(--mat);color:var(--chu);border:1px solid var(--vien);border-radius:14px;max-width:720px;width:100%;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 14px 40px rgba(0,0,0,0.35);overflow:hidden}
-  .modal-box.wide{max-width:920px}
   .modal-header{padding:14px 18px;border-bottom:1px solid var(--vien);display:flex;align-items:center;justify-content:space-between;background:var(--nen)}
   .modal-header h3{margin:0;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
   .modal-close{background:transparent;border:none;font-size:22px;cursor:pointer;color:var(--phu);padding:4px 8px}
@@ -161,8 +169,33 @@
       </span>
     </div>
     <div class="dh-item">
-      <span class="dh-label">Chỉ báo kỹ thuật kích hoạt</span>
-      <span class="dh-val" style="color:var(--chinh);font-weight:600">🐉 Dải Rồng Sonic R (EMA 34) & EMA 89 / 200 (Vũ Tiến)</span>
+      <span class="dh-label">Chỉ báo kỹ thuật</span>
+      <span class="dh-val" style="color:var(--chinh);font-weight:600">🐉 Dải Rồng Sonic R (EMA 34) & EMA 89/200 (Vũ Tiến)</span>
+    </div>
+  </section>
+
+  <!-- KHU VỰC BIỂU ĐỒ TRADINGVIEW TRỰC TIẾP -->
+  <section class="khu-chart-chinh" id="khuChartChinh">
+    <div class="chart-header">
+      <div class="chart-title-group">
+        <h2 style="margin:0">📊 Biểu Đồ TradingView & Dải Rồng Sonic R (H4)</h2>
+        <div class="chart-subtitle" id="tenCapDangXem">Đang tải biểu đồ…</div>
+      </div>
+      <div class="chart-controls">
+        <label for="chonCapTien" style="font-size:12px;font-weight:600;color:var(--phu)">Chọn cặp:</label>
+        <select id="chonCapTien" class="select-cap" onchange="doiCapXem(this.value)"></select>
+        <button id="nutToggleSonic" class="btn-toggle-sonic" type="button" onclick="toggleSonicR()">🐉 Dải Rồng: BẬT</button>
+      </div>
+    </div>
+    
+    <div class="tv-main-box">
+      <div class="tv-legend-bar">
+        <span class="legend-badge rong">🐉 Dải Rồng: EMA 34 High / Close / Low</span>
+        <span class="legend-badge ema89">⚡ EMA 89 (Xu Hướng)</span>
+        <span class="legend-badge ema200">🛡️ EMA 200 (Cản Lớn)</span>
+        <span id="tvThongTinGia" class="legend-badge" style="background:var(--nen);color:var(--chu);font-family:var(--chu-so)"></span>
+      </div>
+      <div id="tradingview_main_container" class="tv-main-chart"></div>
     </div>
   </section>
 
@@ -174,7 +207,7 @@
   </section>
 
   <section>
-    <h2>Lệnh đề xuất (Biểu Đồ TradingView + Sonic R)</h2>
+    <h2>Lệnh đề xuất (Đạt cả 2 điều kiện CSM & Nến)</h2>
     <div class="lenh" id="lenh"></div>
   </section>
 
@@ -184,9 +217,9 @@
   </section>
 
   <section>
-    <h2>Mô hình có nhưng bị loại</h2>
+    <h2>Mô hình nến có nhưng bị loại (Bấm 'Soi Chart' để xem)</h2>
     <div class="bang"><table>
-      <thead><tr><th>Cặp</th><th>Hướng</th><th>Mô hình</th><th>Nến đóng lúc</th><th>Chênh lệch</th><th>Lý do</th></tr></thead>
+      <thead><tr><th>Cặp</th><th>Hướng</th><th>Mô hình</th><th>Nến đóng</th><th>Chênh lệch</th><th>Lý do</th><th>Biểu đồ</th></tr></thead>
       <tbody id="loai"></tbody>
     </table></div>
   </section>
@@ -195,8 +228,8 @@
     <h2>Quy tắc vận hành hệ thống & Chỉ báo Sonic R</h2>
     <ol>
       <li><b>Hệ thống Sonic R (Vũ Tiến):</b>
-        • <b>Dải Rồng (Dragon):</b> Gồm 3 đường <b>EMA 34 High, EMA 34 Close, EMA 34 Low</b> (màu xanh dương). Khi nến nằm trên Dải Rồng = Ưu tiên MUA; nến nằm dưới Dải Rồng = Ưu tiên BÁN.<br>
-        • <b>Đường Xu Hướng Sonic R:</b> <b>EMA 89</b> (đường màu cam) là ranh giới xu hướng quyết định. <b>EMA 200</b> (đường màu tím) đóng vai trò cản xu hướng lớn.
+        • <b>Dải Rồng (Dragon):</b> Gồm 3 đường <b>EMA 34 High, EMA 34 Close, EMA 34 Low</b> (màu xanh dương). Nến nằm trên Dải Rồng = Ưu tiên MUA; nến nằm dưới Dải Rồng = Ưu tiên BÁN.<br>
+        • <b>Đường Xu Hướng:</b> <b>EMA 89</b> (đường màu cam) là ranh giới xu hướng quyết định. <b>EMA 200</b> (đường màu tím) đóng vai trò cản xu hướng lớn.
       </li>
       <li><b>Tầng 1 (Định lượng):</b> Tìm mô hình nến đảo chiều trên <span id="cdGan">3</span> nến 4 giờ vừa đóng, nằm ở đỉnh hoặc đáy của <span id="cdDinh">12</span> nến gần nhất. Chênh lệch sức mạnh đồng Mua - đồng Bán tối thiểu <span id="cdChenh">0,15</span>%.</li>
       <li><b>Quản lý vốn:</b> Cắt lỗ ngoài mô hình + 0.1 ATR. Mục tiêu đỉnh/đáy <span id="cdMuc">20</span> nến. Nếu R:R &lt; 1:1,5, hệ thống gợi ý <b>Giá Chờ Limit</b> để tỷ lệ đạt chuẩn 1:1,5.</li>
@@ -217,8 +250,13 @@
 </div>
 
 <script>
-let duLieuGoc = { dat: [] };
-let chartInstances = {}; // Quản lý các instance biểu đồ TradingView
+let duLieuGoc = { dat: [], loai: [], tat_ca_nen: {} };
+let mainChart = null;
+let currentCandleSeries = null;
+let sonicSeriesList = [];
+let hienThiSonic = true;
+let capDangChon = "";
+
 const $=id=>document.getElementById(id);
 const so=v=>String(v).replace('.',',');
 
@@ -228,8 +266,7 @@ $('doiGiaoDien').addEventListener('click', ()=>{
   const tiepTheo = hienTai === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', tiepTheo);
   localStorage.setItem('theme_h4', tiepTheo);
-  // Vẽ lại toàn bộ chart để cập nhật theme
-  if(duLieuGoc.dat) veLenh(duLieuGoc.dat);
+  if(capDangChon) veMainTradingView(capDangChon);
 });
 if(localStorage.getItem('theme_h4')){
   document.documentElement.setAttribute('data-theme', localStorage.getItem('theme_h4'));
@@ -301,77 +338,75 @@ function tinhEMA(nen, chuKy, nguon = 'c'){
   return kq;
 }
 
-function veSucManh(ds){
-  const lonNhat=Math.max(...ds.map(x=>Math.abs(x.phan_tram)),0.01);
-  $('sucManh').innerHTML=ds.map(x=>{
-    const w=(Math.abs(x.phan_tram)/lonNhat*100).toFixed(0);
-    const am=x.phan_tram<0;
-    return `<span class="ten">${x.tien}</span>
-      <div class="ray trai">${am?`<i style="width:${w}%"></i>`:''}</div>
-      <div class="ray phai">${am?'':`<i style="width:${w}%"></i>`}</div>
-      <span class="gt so">${x.phan_tram>0?'+':''}${so(x.phan_tram.toFixed(2))}%</span>`;
-  }).join('');
+// Bật / Tắt Dải Rồng Sonic R
+function toggleSonicR(){
+  hienThiSonic = !hienThiSonic;
+  $('nutToggleSonic').textContent = hienThiSonic ? '🐉 Dải Rồng: BẬT' : '🐉 Dải Rồng: TẮT';
+  sonicSeriesList.forEach(s => s.applyOptions({ visible: hienThiSonic }));
 }
 
-function veLenh(ds){
-  // Hủy các chart cũ trước khi render mới
-  Object.values(chartInstances).forEach(c => { try{ c.remove(); }catch(e){} });
-  chartInstances = {};
+// Chuyển cặp tiền trên trạm biểu đồ TradingView
+function doiCapXem(tenCap){
+  capDangChon = tenCap;
+  veMainTradingView(tenCap);
+}
 
-  if(!ds.length){
-    $('lenh').innerHTML='<div class="trong">Nến 4 giờ vừa đóng không có cặp nào đạt cả hai điều kiện. Chờ nến tiếp theo.</div>';
+// Bấm nút soi chart từ bảng bị loại
+function soiCap(tenCap){
+  const sel = $('chonCapTien');
+  if(sel) sel.value = tenCap;
+  doiCapXem(tenCap);
+  $('khuChartChinh').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// VẼ BIỂU ĐỒ TRADINGVIEW CHÍNH
+function veMainTradingView(tenCap){
+  const el = $('tradingview_main_container');
+  if(!el) return;
+
+  // Tìm nến của cặp từ dat, loai hoặc tat_ca_nen
+  let dongInfo = (duLieuGoc.dat || []).find(d => d.cap === tenCap) || 
+                 (duLieuGoc.loai || []).find(d => d.cap === tenCap);
+  
+  let nen = null;
+  if(dongInfo && dongInfo.nen && dongInfo.nen.length){
+    nen = dongInfo.nen;
+  } else if(duLieuGoc.tat_ca_nen && duLieuGoc.tat_ca_nen[tenCap]){
+    nen = duLieuGoc.tat_ca_nen[tenCap];
+  }
+
+  // Cập nhật phụ đề cặp tiền
+  if(dongInfo){
+    $('tenCapDangXem').innerHTML = `<b>${tenCap}</b> · Khung 4 giờ (H4) · ${dongInfo.huong === 'MUA' ? '🟢' : '🔴'} Mô hình: <i>${dongInfo.mo_hinh}</i> · Chênh CSM: ${dongInfo.chenh>0?'+':''}${so(dongInfo.chenh)}%`;
+  } else {
+    $('tenCapDangXem').innerHTML = `<b>${tenCap}</b> · Khung 4 giờ (H4) · Dải Rồng Sonic R`;
+  }
+
+  if(mainChart){
+    try{ mainChart.remove(); }catch(e){}
+    mainChart = null;
+  }
+  sonicSeriesList = [];
+
+  if(!nen || !nen.length){
+    // Nếu chưa có nến (ví dụ data.json cũ chưa nạp đủ), nhúng TradingView Widget iframe dự phòng ngay lập tức!
+    const symbolCode = tenCap.replace('/', '');
+    el.innerHTML = `
+      <div style="height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--mat)">
+        <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=FX%3A${symbolCode}&interval=240&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=EMA%40tv-basicstudies%1FEMA%40tv-basicstudies&theme=${document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light'}&style=1&timezone=Asia%2FHo_Chi_Minh" 
+          style="width:100%;height:380px;border:none" allowtransparency="true" scrolling="no"></iframe>
+      </div>
+    `;
     return;
   }
 
-  $('lenh').innerHTML=ds.map((d,k)=>{
-    const isMua = d.huong === 'MUA';
-    const badge = isMua 
-      ? `<span class="badge-huong MUA"><span class="dot xanh"></span>MUA</span>`
-      : `<span class="badge-huong BAN"><span class="dot do"></span>BÁN</span>`;
-    return `<article class="the">
-      <div class="tren">${badge}<span class="cap">${d.cap}</span><span class="stt">#${k+1}</span></div>
-      <div class="mh">${d.mo_hinh} · nến đóng ${d.gio_nen}</div>
-      
-      <!-- Khung biểu đồ TradingView Lightweight Charts kèm Sonic R -->
-      <div class="tv-box">
-        <div class="tv-actions">
-          <span class="sonic-badge">🐉 Dải Rồng Sonic R (EMA 34) & EMA 89/200</span>
-          <span style="font-size:11px;color:var(--phu)">Khung H4 · Phóng to/Kéo rê mượt</span>
-        </div>
-        <div class="tv-chart" id="tv_chart_${k}"></div>
-      </div>
-
-      <div class="cs">
-        <div><span>Giá lúc quét</span><span class="so">${d.gia}</span></div>
-        <div><span>Chênh sức mạnh</span><span class="so ${d.chenh>=0?'chenh-duong':'chenh-am'}">${d.chenh>0?'+':''}${so(d.chenh.toFixed(2))}</span></div>
-        <div><span>Cắt lỗ (SL)</span><span class="so" style="color:var(--ban);font-weight:600">${d.cat_lo}</span></div>
-        <div><span>Mục tiêu (TP)</span><span class="so" style="color:var(--mua);font-weight:600">${d.muc_tieu}</span></div>
-        <div><span>Lời/lỗ</span><span class="so">1:${so(d.loi_lo)}</span></div>
-      </div>
-      ${d.gia_cho?`<div class="cho">Nên chờ giá hồi về <b class="so">${d.gia_cho}</b> để lời/lỗ đạt 1:1,5</div>`:''}
-      <button class="btn-ai" type="button" onclick="moAI(${k})">🤖 Xem Thẩm Định TradingAgents AI</button>
-    </article>`;
-  }).join('');
-
-  // Khởi tạo các biểu đồ TradingView sau khi DOM sẵn sàng
-  setTimeout(()=>{
-    ds.forEach((d, k) => {
-      veTradingViewChart(`tv_chart_${k}`, d);
-    });
-  }, 50);
-}
-
-// Hàm khởi tạo biểu đồ TradingView Lightweight Charts + Sonic R
-function veTradingViewChart(containerId, d){
-  const el = $(containerId);
-  if(!el || !d.nen || !d.nen.length) return;
-  
+  el.innerHTML = '';
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || 
                  (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.getAttribute('data-theme'));
   
-  const chart = LightweightCharts.createChart(el, {
+  mainChart = LightweightCharts.createChart(el, {
     width: el.clientWidth,
-    height: 270,
+    height: 380,
     layout: {
       background: { type: 'solid', color: isDark ? '#17212a' : '#ffffff' },
       textColor: isDark ? '#9aa8b3' : '#5a6874',
@@ -389,7 +424,7 @@ function veTradingViewChart(containerId, d){
     },
     rightPriceScale: {
       borderColor: isDark ? '#2a3742' : '#dde3e8',
-      scaleMargins: { top: 0.12, bottom: 0.12 },
+      scaleMargins: { top: 0.1, bottom: 0.1 },
     },
     timeScale: {
       borderColor: isDark ? '#2a3742' : '#dde3e8',
@@ -399,111 +434,172 @@ function veTradingViewChart(containerId, d){
     handleScroll: { mouseWheel: true, pressedMouseMove: true },
     handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
   });
-  chartInstances[containerId] = chart;
 
-  // 1. Series Nến Nhật Candlestick
-  const candleSeries = chart.addCandlestickSeries({
+  // Series nến
+  currentCandleSeries = mainChart.addCandlestickSeries({
     upColor: '#10b981',
     downColor: '#ef4444',
     borderVisible: false,
     wickUpColor: '#10b981',
     wickDownColor: '#ef4444',
   });
-  
-  const nData = d.nen.map(b => ({
+
+  const nData = nen.map(b => ({
     time: b[0],
     open: b[1],
     high: b[2],
     low: b[3],
     close: b[4]
   }));
-  candleSeries.setData(nData);
+  currentCandleSeries.setData(nData);
 
-  // 2. DẢI RỒNG SONIC R (EMA 34 High, EMA 34 Close, EMA 34 Low)
-  const ema34H = chart.addLineSeries({
-    color: '#38bdf8', // Sky Blue viền trên
+  // DẢI RỒNG SONIC R (EMA 34 High, EMA 34 Close, EMA 34 Low)
+  const ema34H = mainChart.addLineSeries({
+    color: '#38bdf8',
     lineWidth: 1.2,
     priceLineVisible: false,
-    title: 'EMA 34 H'
+    title: 'EMA 34 H',
+    visible: hienThiSonic
   });
-  ema34H.setData(tinhEMA(d.nen, 34, 'h'));
+  ema34H.setData(tinhEMA(nen, 34, 'h'));
 
-  const ema34C = chart.addLineSeries({
-    color: '#0284c7', // Xanh đậm trục giữa của Rồng
-    lineWidth: 1.5,
+  const ema34C = mainChart.addLineSeries({
+    color: '#0284c7',
+    lineWidth: 1.6,
     priceLineVisible: false,
-    title: 'EMA 34 C'
+    title: 'EMA 34 C',
+    visible: hienThiSonic
   });
-  ema34C.setData(tinhEMA(d.nen, 34, 'c'));
+  ema34C.setData(tinhEMA(nen, 34, 'c'));
 
-  const ema34L = chart.addLineSeries({
-    color: '#38bdf8', // Sky Blue viền dưới
+  const ema34L = mainChart.addLineSeries({
+    color: '#38bdf8',
     lineWidth: 1.2,
     priceLineVisible: false,
-    title: 'EMA 34 L'
+    title: 'EMA 34 L',
+    visible: hienThiSonic
   });
-  ema34L.setData(tinhEMA(d.nen, 34, 'l'));
+  ema34L.setData(tinhEMA(nen, 34, 'l'));
 
-  // 3. ĐƯỜNG XU HƯỚNG SONIC R: EMA 89 (Cam đậm)
-  const ema89 = chart.addLineSeries({
-    color: '#f97316', // Màu cam đậm đặc trưng Sonic R
+  // ĐƯỜNG XU HƯỚNG SONIC R: EMA 89 & EMA 200
+  const ema89 = mainChart.addLineSeries({
+    color: '#f97316',
     lineWidth: 2,
     priceLineVisible: false,
-    title: 'EMA 89'
+    title: 'EMA 89',
+    visible: hienThiSonic
   });
-  const data89 = tinhEMA(d.nen, 89, 'c');
+  const data89 = tinhEMA(nen, 89, 'c');
   if(data89.length) ema89.setData(data89);
 
-  // 4. ĐƯỜNG CẢN DÀI HẠN: EMA 200 (Tím nét đứt)
-  const ema200 = chart.addLineSeries({
+  const ema200 = mainChart.addLineSeries({
     color: '#a855f7',
     lineWidth: 1.5,
     lineStyle: LightweightCharts.LineStyle.Dashed,
     priceLineVisible: false,
-    title: 'EMA 200'
+    title: 'EMA 200',
+    visible: hienThiSonic
   });
-  const data200 = tinhEMA(d.nen, 200, 'c');
+  const data200 = tinhEMA(nen, 200, 'c');
   if(data200.length) ema200.setData(data200);
 
-  // 5. CÁC MỨC GIÁ CHUẨN: CẮT LỖ, MỤC TIÊU, VÀO LỆNH
-  const vao = d.gia_cho || d.gia;
-  candleSeries.createPriceLine({
-    price: d.cat_lo,
-    color: '#ef4444',
-    lineWidth: 2,
-    lineStyle: LightweightCharts.LineStyle.Dashed,
-    axisLabelVisible: true,
-    title: 'CẮT LỖ',
-  });
-  candleSeries.createPriceLine({
-    price: d.muc_tieu,
-    color: '#10b981',
-    lineWidth: 2,
-    lineStyle: LightweightCharts.LineStyle.Dashed,
-    axisLabelVisible: true,
-    title: 'MỤC TIÊU',
-  });
-  candleSeries.createPriceLine({
-    price: vao,
-    color: '#3b82f6',
-    lineWidth: 2,
-    lineStyle: LightweightCharts.LineStyle.Solid,
-    axisLabelVisible: true,
-    title: d.gia_cho ? 'LỆNH CHỜ' : 'VÀO LỆNH',
+  sonicSeriesList = [ema34H, ema34C, ema34L, ema89, ema200];
+
+  // Nếu cặp này có setup mô hình, kẻ đường Cắt Lỗ, Mục Tiêu
+  if(dongInfo && dongInfo.cat_lo){
+    const vao = dongInfo.gia_cho || dongInfo.gia;
+    currentCandleSeries.createPriceLine({
+      price: dongInfo.cat_lo,
+      color: '#ef4444',
+      lineWidth: 2,
+      lineStyle: LightweightCharts.LineStyle.Dashed,
+      axisLabelVisible: true,
+      title: 'CẮT LỖ',
+    });
+    currentCandleSeries.createPriceLine({
+      price: dongInfo.muc_tieu,
+      color: '#10b981',
+      lineWidth: 2,
+      lineStyle: LightweightCharts.LineStyle.Dashed,
+      axisLabelVisible: true,
+      title: 'MỤC TIÊU',
+    });
+    currentCandleSeries.createPriceLine({
+      price: vao,
+      color: '#3b82f6',
+      lineWidth: 2,
+      lineStyle: LightweightCharts.LineStyle.Solid,
+      axisLabelVisible: true,
+      title: dongInfo.gia_cho ? 'LỆNH CHỜ' : 'VÀO LỆNH',
+    });
+  }
+
+  // Cập nhật giá nến mới nhất vào thanh legend
+  const nCuoi = nen[nen.length - 1];
+  $('tvThongTinGia').textContent = `Giá: ${nCuoi[4]} | O: ${nCuoi[1]} H: ${nCuoi[2]} L: ${nCuoi[3]}`;
+
+  // Crosshair move handler
+  mainChart.subscribeCrosshairMove(param => {
+    if(!param || !param.time){
+      $('tvThongTinGia').textContent = `Giá: ${nCuoi[4]} | O: ${nCuoi[1]} H: ${nCuoi[2]} L: ${nCuoi[3]}`;
+      return;
+    }
+    const cData = param.seriesData.get(currentCandleSeries);
+    if(cData){
+      $('tvThongTinGia').textContent = `Đóng: ${cData.close} | Mở: ${cData.open} | Cao: ${cData.high} | Thấp: ${cData.low}`;
+    }
   });
 
-  // Tự động fit biểu đồ
-  chart.timeScale().fitContent();
+  mainChart.timeScale().fitContent();
 
-  // Resize khi cửa sổ trình duyệt thay đổi
   window.addEventListener('resize', () => {
-    if(el && el.clientWidth) chart.applyOptions({ width: el.clientWidth });
+    if(el && el.clientWidth && mainChart) mainChart.applyOptions({ width: el.clientWidth });
   });
+}
+
+function veSucManh(ds){
+  const lonNhat=Math.max(...ds.map(x=>Math.abs(x.phan_tram)),0.01);
+  $('sucManh').innerHTML=ds.map(x=>{
+    const w=(Math.abs(x.phan_tram)/lonNhat*100).toFixed(0);
+    const am=x.phan_tram<0;
+    return `<span class="ten">${x.tien}</span>
+      <div class="ray trai">${am?`<i style="width:${w}%"></i>`:''}</div>
+      <div class="ray phai">${am?'':`<i style="width:${w}%"></i>`}</div>
+      <span class="gt so">${x.phan_tram>0?'+':''}${so(x.phan_tram.toFixed(2))}%</span>`;
+  }).join('');
+}
+
+function veLenh(ds){
+  if(!ds.length){
+    $('lenh').innerHTML='<div class="trong">Nến 4 giờ vừa đóng chưa có cặp nào đồng pha cả 2 điều kiện (CSM ≥ 0.15% + Nến đảo chiều).<br>👉 Anh hãy bấm nút <b>📊 Soi Chart</b> ở bảng bên dưới để soi biểu đồ TradingView & Dải Rồng Sonic R của từng cặp!</div>';
+    return;
+  }
+
+  $('lenh').innerHTML=ds.map((d,k)=>{
+    const isMua = d.huong === 'MUA';
+    const badge = isMua 
+      ? `<span class="badge-huong MUA"><span class="dot xanh"></span>MUA</span>`
+      : `<span class="badge-huong BAN"><span class="dot do"></span>BÁN</span>`;
+    return `<article class="the">
+      <div class="tren">${badge}<span class="cap">${d.cap}</span><span class="stt">#${k+1}</span></div>
+      <div class="mh">${d.mo_hinh} · nến đóng ${d.gio_nen}</div>
+      <div class="cs">
+        <div><span>Giá lúc quét</span><span class="so">${d.gia}</span></div>
+        <div><span>Chênh sức mạnh</span><span class="so ${d.chenh>=0?'chenh-duong':'chenh-am'}">${d.chenh>0?'+':''}${so(d.chenh.toFixed(2))}</span></div>
+        <div><span>Cắt lỗ (SL)</span><span class="so" style="color:var(--ban);font-weight:600">${d.cat_lo}</span></div>
+        <div><span>Mục tiêu (TP)</span><span class="so" style="color:var(--mua);font-weight:600">${d.muc_tieu}</span></div>
+        <div><span>Lời/lỗ</span><span class="so">1:${so(d.loi_lo)}</span></div>
+      </div>
+      ${d.gia_cho?`<div class="cho">Nên chờ giá hồi về <b class="so">${d.gia_cho}</b> để lời/lỗ đạt 1:1,5</div>`:''}
+      <button class="btn-ai" type="button" onclick="moAI(${k})">🤖 Xem Thẩm Định TradingAgents AI</button>
+      <button class="btn-soi" style="width:100%;margin-top:6px;padding:8px" type="button" onclick="soiCap('${d.cap}')">📊 Soi Biểu Đồ Cặp Này</button>
+    </article>`;
+  }).join('');
 }
 
 function veLoai(ds){
   if(!ds.length){
-    $('loai').innerHTML='<tr><td colspan="6">Không có mô hình nào bị loại.</td></tr>';
+    $('loai').innerHTML='<tr><td colspan="7">Không có mô hình nào bị loại.</td></tr>';
     return;
   }
   $('loai').innerHTML=ds.map(d=>{
@@ -521,8 +617,34 @@ function veLoai(ds){
       <td class="so">${d.gio_nen}</td>
       <td>${chenhHtml}</td>
       <td><span class="lydo-tag">${d.ly_do}</span></td>
+      <td><button class="btn-soi" type="button" onclick="soiCap('${d.cap}')">📊 Soi Chart</button></td>
     </tr>`;
   }).join('');
+}
+
+// Cập nhật danh sách cặp trong dropdown chọn
+function capNhatDanhSachChon(){
+  const sel = $('chonCapTien');
+  if(!sel) return;
+  
+  let dsCap = [];
+  (duLieuGoc.dat || []).forEach(d => { if(!dsCap.includes(d.cap)) dsCap.push(d.cap); });
+  (duLieuGoc.loai || []).forEach(d => { if(!dsCap.includes(d.cap)) dsCap.push(d.cap); });
+  if(duLieuGoc.tat_ca_nen){
+    Object.keys(duLieuGoc.tat_ca_nen).forEach(c => { if(!dsCap.includes(c)) dsCap.push(c); });
+  }
+
+  // Danh sách fallback 28 cặp nếu data.json chưa có
+  if(!dsCap.length){
+    dsCap = ["NZD/USD", "EUR/CHF", "CAD/JPY", "AUD/CAD", "EUR/JPY", "GBP/USD", "USD/JPY", "EUR/USD", "GBP/JPY", "AUD/USD"];
+  }
+
+  sel.innerHTML = dsCap.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  if(!capDangChon || !dsCap.includes(capDangChon)){
+    capDangChon = dsCap[0];
+  }
+  sel.value = capDangChon;
 }
 
 // Modal Thẩm Định TradingAgents AI
@@ -586,7 +708,12 @@ async function tai(){
     $('trangthai').textContent=`Cập nhật ${d.cap_nhat} · nến 4 giờ vừa đóng lúc ${d.nen_4_gio_dong} (GMT+7) · đọc được ${d.so_cap_doc_duoc}/28 cặp`;
     $('mau').hidden=!d.du_lieu_mau;
     $('tieuDeSucManh').textContent='Sức mạnh tiền tệ (% '+(d.cach_do||'từ giá mở cửa ngày')+')';
-    veSucManh(d.suc_manh); veLenh(d.dat); veLoai(d.loai||[]);
+    veSucManh(d.suc_manh); 
+    veLenh(d.dat); 
+    veLoai(d.loai||[]);
+    capNhatDanhSachChon();
+    veMainTradingView(capDangChon);
+
     $('khuCanhBao').hidden=!(d.canh_bao&&d.canh_bao.length);
     $('canhBao').innerHTML=(d.canh_bao||[]).map(c=>`<li>${c}</li>`).join('');
     const c=d.cai_dat||{};
