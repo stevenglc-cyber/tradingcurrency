@@ -26,7 +26,7 @@ SO_NEN_GAN_NHAT_XET = 3     # Xét mô hình trong bao nhiêu nến 4 giờ vừ
 CHENH_LECH_TOI_THIEU = 0.15  # Chênh lệch sức mạnh tối thiểu giữa 2 đồng (đơn vị %)
 SO_NEN_TIM_MUC_TIEU = 20    # Mục tiêu = đỉnh/đáy của bao nhiêu nến 4 giờ gần nhất
 SO_GIO_DAU_NGAY = 8         # Trong bao nhiêu giờ đầu ngày giao dịch thì đo sức mạnh theo 24 giờ gần nhất
-SO_NEN_TREN_BIEU_DO = 45    # Số nến 4 giờ vẽ trên ảnh biểu đồ gửi Telegram và trên trang web
+SO_NEN_TREN_BIEU_DO = 100   # Số nến 4 giờ gửi ra web để vẽ TradingView Lightweight Charts và Sonic R
 # ---------------------------------------------------------------
 
 TIEN = ["EUR", "GBP", "AUD", "NZD", "USD", "CAD", "CHF", "JPY"]
@@ -421,11 +421,17 @@ def ve_bieu_do(d, duong_dan):
     """Vẽ nến 4 giờ kèm vùng vào lệnh, cắt lỗ, mục tiêu. Lưu ảnh PNG."""
     plt = chuan_bi_matplotlib()
     from matplotlib.patches import Rectangle
-    nen = d["nen"]
+    nen_goc = d["nen"]
     sl = d["so_le"]
     vao = d.get("gia_cho") or d["gia"]
     mua = d["huong"] == "MUA"
     XANH, DO, LAM, VANG, XAM, CHU = "#16a06a", "#d84a3c", "#2563c9", "#e8a317", "#8a96a3", "#1c2733"
+
+    # Lấy tối đa 45 nến gần nhất để vẽ ảnh Telegram to rõ
+    so_nen_ve = min(45, len(nen_goc))
+    nen = nen_goc[-so_nen_ve:]
+    lech_idx = len(nen_goc) - so_nen_ve
+    chi_so_mh = max(0, d["chi_so_mh"] - lech_idx)
 
     fig, ax = plt.subplots(figsize=(8, 5.4), dpi=140)
     fig.patch.set_facecolor("white")
@@ -438,13 +444,13 @@ def ve_bieu_do(d, duong_dan):
                                facecolor=mau, edgecolor=mau, zorder=3))
 
     # Vùng lời và lỗ tính từ nến mô hình sang phải
-    x0, x1 = d["chi_so_mh"] + 0.5, n + 3
+    x0, x1 = chi_so_mh + 0.5, n + 3
     ax.add_patch(Rectangle((x0, min(vao, d["cat_lo"])), x1 - x0, abs(vao - d["cat_lo"]),
                            facecolor=DO, alpha=0.10, zorder=1))
     ax.add_patch(Rectangle((x0, min(vao, d["muc_tieu"])), x1 - x0, abs(vao - d["muc_tieu"]),
                            facecolor=XANH, alpha=0.10, zorder=1))
     # Đánh dấu nến mô hình
-    i = d["chi_so_mh"]
+    i = chi_so_mh
     ax.axvspan(i - d.get("so_nen_mh", 1) + 0.5, i + 0.5, color=VANG, alpha=0.22, zorder=0)
     cum = nen[max(0, i - d.get("so_nen_mh", 1) + 1):i + 1]
     y_mui = min(x[3] for x in cum) if mua else max(x[2] for x in cum)
