@@ -19,7 +19,11 @@
   },
   {
    "tien": "AUD",
-   "phan_tram": 0.01
+   "phan_tram": 0.03
+  },
+  {
+   "tien": "EUR",
+   "phan_tram": -0.0
   },
   {
    "tien": "EUR",
