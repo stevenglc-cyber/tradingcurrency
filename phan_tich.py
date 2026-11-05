@@ -51,7 +51,7 @@ FILE_DATA = os.path.join(THU_MUC, "data.json")
 FILE_LICH_SU = os.path.join(THU_MUC, "lich_su_nen.json")
 
 # Lấy từ GitHub Secrets hoặc biến môi trường
-TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()
+TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip() or os.environ.get("TELEGRAM_TOKEN", "").strip()
 TELEGRAM_CHAT_ID = os.environ.get("TELEGRAM_CHAT_ID", "").strip()
 # Đặt "co" khi chạy thử bằng tay trên GitHub Actions để luôn nhận tin
 LUON_GUI = os.environ.get("LUON_GUI_TELEGRAM", "") == "co"

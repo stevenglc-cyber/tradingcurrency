@@ -32,7 +32,8 @@ jobs:
           pip install matplotlib
       - name: Phan tich va gui Telegram
         env:
-          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN || secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN || secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DIA_CHI_WEB: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
           LUON_GUI_TELEGRAM: ${{ github.event.inputs.luon_gui }}
