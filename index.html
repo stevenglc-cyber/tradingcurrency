@@ -5,13 +5,14 @@
   <title>Bàn Ghép Cặp H4 & TradingAgents AI</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap">
   <style>
   :root{
     --nen:#f3f5f7; --mat:#ffffff; --chu:#14202b; --phu:#5a6874; --vien:#dde3e8;
     --chinh:#1f4e79; --chinh-hover:#163b5c; --mua:#127a4a; --mua-nen:#e3f4ea; 
     --ban:#b3261e; --ban-nen:#fbe6e4; --canh:#8a5a00; --canh-nen:#fdf1d8;
     --ai:#6b21a8; --ai-nen:#f3e8ff; --ai-vien:#d8b4fe;
+    --table-hover:rgba(31,78,121,0.04);
     --chu-ui:"Be Vietnam Pro", system-ui, sans-serif; --chu-so:"IBM Plex Mono", ui-monospace, monospace;
   }
   @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
@@ -19,17 +20,19 @@
     --chinh:#8ab8e6; --chinh-hover:#a8ccf0; --mua:#4cc38a; --mua-nen:#123425; 
     --ban:#f2827a; --ban-nen:#3a1b19; --canh:#f0c060; --canh-nen:#3a2d10; 
     --ai:#c084fc; --ai-nen:#2e1065; --ai-vien:#581c87;
+    --table-hover:rgba(255,255,255,0.03);
     color-scheme:dark}}
   :root[data-theme="dark"]{
     --nen:#0f161c; --mat:#17212a; --chu:#e6edf2; --phu:#9aa8b3; --vien:#2a3742;
     --chinh:#8ab8e6; --chinh-hover:#a8ccf0; --mua:#4cc38a; --mua-nen:#123425; 
     --ban:#f2827a; --ban-nen:#3a1b19; --canh:#f0c060; --canh-nen:#3a2d10; 
     --ai:#c084fc; --ai-nen:#2e1065; --ai-vien:#581c87;
+    --table-hover:rgba(255,255,255,0.03);
     color-scheme:dark}
   *{box-sizing:border-box}
   body{background:var(--nen);color:var(--chu);font-family:var(--chu-ui);font-size:15px;line-height:1.55;
     padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;margin:0}
-  main{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+  main{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:24px}
   h1{font-size:24px;font-weight:700;margin:0;letter-spacing:-.01em;text-wrap:balance}
   h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--phu);margin:0 0 12px}
   .so{font-family:var(--chu-so);font-variant-numeric:tabular-nums}
@@ -39,6 +42,15 @@
   button{font:inherit;font-size:14px;font-weight:500;color:var(--chinh);background:var(--mat);border:1px solid var(--vien);border-radius:8px;padding:8px 14px;cursor:pointer;transition:all 0.15s ease}
   button:hover{background:var(--vien)}
   button:focus-visible{outline:2px solid var(--chinh);outline-offset:2px}
+  
+  /* Widget Đếm Ngược Nến H4 */
+  .dong-ho-khu{background:var(--mat);border:1px solid var(--vien);border-radius:14px;padding:14px 18px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+  .dh-item{display:flex;flex-direction:column;gap:3px}
+  .dh-label{font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--phu)}
+  .dh-time{font-size:24px;font-weight:700;color:var(--chinh);letter-spacing:0.05em;display:flex;align-items:center;gap:6px}
+  .dh-val{font-size:13px;color:var(--chu)}
+  .tag-gmt{background:var(--nen);border:1px solid var(--vien);padding:2px 7px;border-radius:6px;font-size:11px;font-weight:600;color:var(--phu)}
+
   .mau{background:var(--canh-nen);color:var(--canh);border-radius:8px;padding:10px 14px;font-size:14px}
   .sm{display:grid;grid-template-columns:44px 1fr 1fr 64px;gap:8px 6px;align-items:center;background:var(--mat);border:1px solid var(--vien);border-radius:12px;padding:14px}
   .sm .ten{font-weight:600}
@@ -47,11 +59,10 @@
   .ray i{display:block;height:100%;border-radius:2px}
   .ray.trai i{background:var(--ban)} .ray.phai i{background:var(--mua)}
   .sm .gt{text-align:right;font-size:13px}
+  
   .lenh{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
   .the{background:var(--mat);border:1px solid var(--vien);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0;position:relative}
   .the .tren{display:flex;align-items:center;gap:10px}
-  .huong{font-size:12px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:6px}
-  .huong.MUA{background:var(--mua-nen);color:var(--mua)} .huong.BÁN{background:var(--ban-nen);color:var(--ban)}
   .the .cap{font-size:20px;font-weight:700}
   .the .stt{margin-left:auto;color:var(--phu);font-size:13px}
   .the .mh{color:var(--phu);font-size:13px}
@@ -65,11 +76,27 @@
   .btn-ai:hover{filter:brightness(0.95)}
   .canhbao{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
   .canhbao li{background:var(--canh-nen);color:var(--canh);border-radius:8px;padding:9px 12px;font-size:14px}
+  
+  /* Bảng Mô Hình Bị Loại & Badges */
   .bang{overflow-x:auto;background:var(--mat);border:1px solid var(--vien);border-radius:12px}
-  table{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}
-  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--vien)}
-  th{color:var(--phu);font-weight:500}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:540px}
+  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--vien);vertical-align:middle}
+  th{color:var(--phu);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.04em}
   tr:last-child td{border-bottom:none}
+  tbody tr:hover{background:var(--table-hover)}
+  
+  /* Badge Hướng Mua / Bán dạng nút tròn */
+  .badge-huong{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:0.04em}
+  .badge-huong.MUA{background:var(--mua-nen);color:var(--mua);border:1px solid rgba(18,122,74,0.3)}
+  .badge-huong.BAN{background:var(--ban-nen);color:var(--ban);border:1px solid rgba(179,38,30,0.3)}
+  .dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+  .dot.xanh{background:var(--mua);box-shadow:0 0 6px var(--mua)}
+  .dot.do{background:var(--ban);box-shadow:0 0 6px var(--ban)}
+  
+  .chenh-duong{color:var(--mua);font-weight:600}
+  .chenh-am{color:var(--ban);font-weight:600}
+  .lydo-tag{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;background:var(--nen);color:var(--phu);border:1px solid var(--vien)}
+
   .cach{color:var(--phu);font-size:14px;max-width:65ch}
   .cach ol{padding-left:20px;margin:6px 0}
   .trong{color:var(--phu);background:var(--mat);border:1px dashed var(--vien);border-radius:12px;padding:16px}
@@ -109,6 +136,24 @@
       <button id="taiLai" type="button">Tải lại</button>
     </div>
   </header>
+
+  <!-- Thanh HUD Đếm Ngược Đóng Nến H4 -->
+  <section class="dong-ho-khu">
+    <div class="dh-item">
+      <span class="dh-label">⏳ Đếm ngược nến H4 đóng</span>
+      <span class="dh-time so" id="dongHoH4">--:--:--</span>
+    </div>
+    <div class="dh-item">
+      <span class="dh-label">Mốc đóng nến tiếp theo</span>
+      <span class="dh-val">
+        <b id="mocDongH4">--:--</b> <span class="tag-gmt">GMT+7 (Giờ VN)</span> · <span class="tag-gmt">MT5: <b id="mocDongMT5">--:--</b></span>
+      </span>
+    </div>
+    <div class="dh-item">
+      <span class="dh-label">Chu kỳ nến H4 trong ngày</span>
+      <span class="dh-val" style="color:var(--phu);font-size:12px">01:00 · 05:00 · 09:00 · 13:00 · 17:00 · 21:00 (GMT+7)</span>
+    </div>
+  </section>
 
   <div class="mau" id="mau" hidden>Đây là dữ liệu mẫu từ phân tích. Trang sẽ tự thay bằng dữ liệu thật sau lần chạy đầu tiên.</div>
 
@@ -173,6 +218,53 @@ if(localStorage.getItem('theme_h4')){
   document.documentElement.setAttribute('data-theme', localStorage.getItem('theme_h4'));
 }
 
+// Bộ đếm ngược thời gian nến H4 đóng theo GMT+7 (Giờ VN)
+function capNhatDemNguoc(){
+  const now = new Date();
+  // Chuyển sang thời gian GMT+7
+  const utcMs = now.getTime() + (now.getTimezoneOffset() * 60000);
+  const vnTime = new Date(utcMs + (7 * 3600000));
+  
+  const gio = vnTime.getHours();
+  const phut = vnTime.getMinutes();
+  const giay = vnTime.getSeconds();
+  
+  // Chu kỳ nến H4 sàn MT5: 1h, 5h, 9h, 13h, 17h, 21h (GMT+7)
+  const mocs = [1, 5, 9, 13, 17, 21];
+  let nextMoc = mocs.find(m => m > gio);
+  let ngayCong = 0;
+  if(nextMoc === undefined){
+    nextMoc = 1;
+    ngayCong = 1;
+  }
+  
+  const target = new Date(vnTime);
+  target.setDate(target.getDate() + ngayCong);
+  target.setHours(nextMoc, 0, 0, 0);
+  
+  let diffMs = target.getTime() - vnTime.getTime();
+  if(diffMs < 0) diffMs = 0;
+  
+  const h = Math.floor(diffMs / 3600000);
+  const m = Math.floor((diffMs % 3600000) / 60000);
+  const s = Math.floor((diffMs % 60000) / 1000);
+  
+  const pad = n => String(n).padStart(2, '0');
+  $('dongHoH4').textContent = `${pad(h)}:${pad(m)}:${pad(s)}`;
+  $('mocDongH4').textContent = `${pad(nextMoc)}:00 ${ngayCong ? '(ngày mai)' : ''}`;
+  
+  // Mốc giờ sàn MT5 tương ứng (0h sàn MT5 = 17h New York = 5h sáng VN)
+  const mt5Hour = (nextMoc - 5 + 24) % 24;
+  $('mocDongMT5').textContent = `${pad(mt5Hour)}:00`;
+  
+  // Khi nến đóng đúng 00:00:00 thì tự tải lại sau 15 giây
+  if(diffMs <= 1000 && diffMs > 0){
+    setTimeout(tai, 15000);
+  }
+}
+setInterval(capNhatDemNguoc, 1000);
+capNhatDemNguoc();
+
 function veSucManh(ds){
   const lonNhat=Math.max(...ds.map(x=>Math.abs(x.phan_tram)),0.01);
   $('sucManh').innerHTML=ds.map(x=>{
@@ -187,20 +279,26 @@ function veSucManh(ds){
 
 function veLenh(ds){
   if(!ds.length){$('lenh').innerHTML='<div class="trong">Nến 4 giờ vừa đóng không có cặp nào đạt cả hai điều kiện. Chờ nến tiếp theo.</div>';return;}
-  $('lenh').innerHTML=ds.map((d,k)=>`<article class="the">
-    <div class="tren"><span class="huong ${d.huong}">${d.huong}</span><span class="cap">${d.cap}</span><span class="stt">#${k+1}</span></div>
-    <div class="mh">${d.mo_hinh} · nến đóng ${d.gio_nen}</div>
-    ${d.nen?`<div class="bdbox"><canvas class="bd" data-k="${k}" role="img" aria-label="Biểu đồ nến 4 giờ ${d.cap}"></canvas></div>`:''}
-    <div class="cs">
-      <div><span>Giá lúc quét</span><span class="so">${d.gia}</span></div>
-      <div><span>Chênh sức mạnh</span><span class="so">${so(d.chenh.toFixed(2))}</span></div>
-      <div><span>Cắt lỗ</span><span class="so">${d.cat_lo}</span></div>
-      <div><span>Mục tiêu</span><span class="so">${d.muc_tieu}</span></div>
-      <div><span>Lời/lỗ</span><span class="so">1:${so(d.loi_lo)}</span></div>
-    </div>
-    ${d.gia_cho?`<div class="cho">Nên chờ giá hồi về <b class="so">${d.gia_cho}</b> để lời/lỗ đạt 1:1,5</div>`:''}
-    <button class="btn-ai" type="button" onclick="moAI(${k})">🤖 Xem Thẩm Định TradingAgents AI</button>
-  </article>`).join('');
+  $('lenh').innerHTML=ds.map((d,k)=>{
+    const isMua = d.huong === 'MUA';
+    const badge = isMua 
+      ? `<span class="badge-huong MUA"><span class="dot xanh"></span>MUA</span>`
+      : `<span class="badge-huong BAN"><span class="dot do"></span>BÁN</span>`;
+    return `<article class="the">
+      <div class="tren">${badge}<span class="cap">${d.cap}</span><span class="stt">#${k+1}</span></div>
+      <div class="mh">${d.mo_hinh} · nến đóng ${d.gio_nen}</div>
+      ${d.nen?`<div class="bdbox"><canvas class="bd" data-k="${k}" role="img" aria-label="Biểu đồ nến 4 giờ ${d.cap}"></canvas></div>`:''}
+      <div class="cs">
+        <div><span>Giá lúc quét</span><span class="so">${d.gia}</span></div>
+        <div><span>Chênh sức mạnh</span><span class="so ${d.chenh>=0?'chenh-duong':'chenh-am'}">${d.chenh>0?'+':''}${so(d.chenh.toFixed(2))}</span></div>
+        <div><span>Cắt lỗ</span><span class="so">${d.cat_lo}</span></div>
+        <div><span>Mục tiêu</span><span class="so">${d.muc_tieu}</span></div>
+        <div><span>Lời/lỗ</span><span class="so">1:${so(d.loi_lo)}</span></div>
+      </div>
+      ${d.gia_cho?`<div class="cho">Nên chờ giá hồi về <b class="so">${d.gia_cho}</b> để lời/lỗ đạt 1:1,5</div>`:''}
+      <button class="btn-ai" type="button" onclick="moAI(${k})">🤖 Xem Thẩm Định TradingAgents AI</button>
+    </article>`;
+  }).join('');
   document.querySelectorAll('canvas.bd').forEach(c=>veBieuDo(c,ds[+c.dataset.k]));
 }
 
@@ -231,8 +329,27 @@ function veBieuDo(cv,d){
 }
 
 function veLoai(ds){
-  $('loai').innerHTML=ds.length?ds.map(d=>`<tr><td><b>${d.cap}</b></td><td>${d.huong}</td><td>${d.mo_hinh}</td><td class="so">${d.gio_nen}</td><td class="so">${so(d.chenh.toFixed(2))}</td><td>${d.ly_do}</td></tr>`).join('')
-    :'<tr><td colspan="6">Không có mô hình nào bị loại.</td></tr>';
+  if(!ds.length){
+    $('loai').innerHTML='<tr><td colspan="6">Không có mô hình nào bị loại.</td></tr>';
+    return;
+  }
+  $('loai').innerHTML=ds.map(d=>{
+    const isMua = d.huong === 'MUA';
+    const badge = isMua 
+      ? `<span class="badge-huong MUA"><span class="dot xanh"></span>MUA</span>` 
+      : `<span class="badge-huong BAN"><span class="dot do"></span>BÁN</span>`;
+    const chenhHtml = d.chenh >= 0 
+      ? `<span class="so chenh-duong">+${so(d.chenh.toFixed(2))}</span>` 
+      : `<span class="so chenh-am">${so(d.chenh.toFixed(2))}</span>`;
+    return `<tr>
+      <td><b>${d.cap}</b></td>
+      <td>${badge}</td>
+      <td>${d.mo_hinh}</td>
+      <td class="so">${d.gio_nen}</td>
+      <td>${chenhHtml}</td>
+      <td><span class="lydo-tag">${d.ly_do}</span></td>
+    </tr>`;
+  }).join('');
 }
 
 // Modal Thẩm Định TradingAgents AI
@@ -293,7 +410,7 @@ async function tai(){
     if(!r.ok) throw new Error(r.status);
     const d=await r.json();
     duLieuGoc = d;
-    $('trangthai').textContent=`Cập nhật ${d.cap_nhat} · nến 4 giờ vừa đóng lúc ${d.nen_4_gio_dong} (giờ Việt Nam) · đọc được ${d.so_cap_doc_duoc}/28 cặp`;
+    $('trangthai').textContent=`Cập nhật ${d.cap_nhat} · nến 4 giờ vừa đóng lúc ${d.nen_4_gio_dong} (GMT+7) · đọc được ${d.so_cap_doc_duoc}/28 cặp`;
     $('mau').hidden=!d.du_lieu_mau;
     $('tieuDeSucManh').textContent='Sức mạnh tiền tệ (% '+(d.cach_do||'từ giá mở cửa ngày')+')';
     veSucManh(d.suc_manh); veLenh(d.dat); veLoai(d.loai||[]);
