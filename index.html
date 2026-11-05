@@ -445,8 +445,6 @@ function veMainTradingView(tenCap){
   }
 
   el.innerHTML = '';
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || 
-                 (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.getAttribute('data-theme'));
   
   mainChart = LightweightCharts.createChart(el, {
     width: el.clientWidth,
