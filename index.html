@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <title>Bàn Ghép Cặp H4 & TradingAgents AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+  :root{
+    --nen:#f3f5f7; --mat:#ffffff; --chu:#14202b; --phu:#5a6874; --vien:#dde3e8;
+    --chinh:#1f4e79; --chinh-hover:#163b5c; --mua:#127a4a; --mua-nen:#e3f4ea; 
+    --ban:#b3261e; --ban-nen:#fbe6e4; --canh:#8a5a00; --canh-nen:#fdf1d8;
+    --ai:#6b21a8; --ai-nen:#f3e8ff; --ai-vien:#d8b4fe;
+    --chu-ui:"Be Vietnam Pro", system-ui, sans-serif; --chu-so:"IBM Plex Mono", ui-monospace, monospace;
+  }
+  @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+    --nen:#0f161c; --mat:#17212a; --chu:#e6edf2; --phu:#9aa8b3; --vien:#2a3742;
+    --chinh:#8ab8e6; --chinh-hover:#a8ccf0; --mua:#4cc38a; --mua-nen:#123425; 
+    --ban:#f2827a; --ban-nen:#3a1b19; --canh:#f0c060; --canh-nen:#3a2d10; 
+    --ai:#c084fc; --ai-nen:#2e1065; --ai-vien:#581c87;
+    color-scheme:dark}}
+  :root[data-theme="dark"]{
+    --nen:#0f161c; --mat:#17212a; --chu:#e6edf2; --phu:#9aa8b3; --vien:#2a3742;
+    --chinh:#8ab8e6; --chinh-hover:#a8ccf0; --mua:#4cc38a; --mua-nen:#123425; 
+    --ban:#f2827a; --ban-nen:#3a1b19; --canh:#f0c060; --canh-nen:#3a2d10; 
+    --ai:#c084fc; --ai-nen:#2e1065; --ai-vien:#581c87;
+    color-scheme:dark}
+  *{box-sizing:border-box}
+  body{background:var(--nen);color:var(--chu);font-family:var(--chu-ui);font-size:15px;line-height:1.55;
+    padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px;margin:0}
+  main{max-width:880px;margin:0 auto;display:flex;flex-direction:column;gap:28px}
+  h1{font-size:24px;font-weight:700;margin:0;letter-spacing:-.01em;text-wrap:balance}
+  h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.08em;color:var(--phu);margin:0 0 12px}
+  .so{font-family:var(--chu-so);font-variant-numeric:tabular-nums}
+  .dau{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px}
+  .trangthai{color:var(--phu);font-size:13px;margin-top:4px}
+  .header-actions{display:flex;gap:8px;align-items:center}
+  button{font:inherit;font-size:14px;font-weight:500;color:var(--chinh);background:var(--mat);border:1px solid var(--vien);border-radius:8px;padding:8px 14px;cursor:pointer;transition:all 0.15s ease}
+  button:hover{background:var(--vien)}
+  button:focus-visible{outline:2px solid var(--chinh);outline-offset:2px}
+  .mau{background:var(--canh-nen);color:var(--canh);border-radius:8px;padding:10px 14px;font-size:14px}
+  .sm{display:grid;grid-template-columns:44px 1fr 1fr 64px;gap:8px 6px;align-items:center;background:var(--mat);border:1px solid var(--vien);border-radius:12px;padding:14px}
+  .sm .ten{font-weight:600}
+  .ray{height:12px;display:flex}
+  .ray.trai{justify-content:flex-end;border-right:1px solid var(--vien)}
+  .ray i{display:block;height:100%;border-radius:2px}
+  .ray.trai i{background:var(--ban)} .ray.phai i{background:var(--mua)}
+  .sm .gt{text-align:right;font-size:13px}
+  .lenh{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+  .the{background:var(--mat);border:1px solid var(--vien);border-radius:12px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0;position:relative}
+  .the .tren{display:flex;align-items:center;gap:10px}
+  .huong{font-size:12px;font-weight:700;letter-spacing:.06em;padding:3px 9px;border-radius:6px}
+  .huong.MUA{background:var(--mua-nen);color:var(--mua)} .huong.BÁN{background:var(--ban-nen);color:var(--ban)}
+  .the .cap{font-size:20px;font-weight:700}
+  .the .stt{margin-left:auto;color:var(--phu);font-size:13px}
+  .the .mh{color:var(--phu);font-size:13px}
+  .cs{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:13px}
+  .cs div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--vien);padding-bottom:4px}
+  .cs span:first-child{color:var(--phu)}
+  .bdbox{width:100%;min-width:0}
+  .bd{display:block}
+  .cho{background:var(--canh-nen);color:var(--canh);font-size:13px;border-radius:8px;padding:6px 10px}
+  .btn-ai{background:var(--ai-nen);color:var(--ai);border:1px solid var(--ai-vien);font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 12px;border-radius:8px;width:100%;margin-top:4px}
+  .btn-ai:hover{filter:brightness(0.95)}
+  .canhbao{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+  .canhbao li{background:var(--canh-nen);color:var(--canh);border-radius:8px;padding:9px 12px;font-size:14px}
+  .bang{overflow-x:auto;background:var(--mat);border:1px solid var(--vien);border-radius:12px}
+  table{border-collapse:collapse;width:100%;font-size:13px;min-width:520px}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--vien)}
+  th{color:var(--phu);font-weight:500}
+  tr:last-child td{border-bottom:none}
+  .cach{color:var(--phu);font-size:14px;max-width:65ch}
+  .cach ol{padding-left:20px;margin:6px 0}
+  .trong{color:var(--phu);background:var(--mat);border:1px dashed var(--vien);border-radius:12px;padding:16px}
+  @media (max-width:420px){.sm{grid-template-columns:40px 1fr 1fr 56px}}
+
+  /* Modal TradingAgents AI */
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.6);backdrop-filter:blur(3px);display:flex;align-items:center;justify-content:center;padding:16px;z-index:999;opacity:0;pointer-events:none;transition:opacity 0.2s ease}
+  .modal-overlay.open{opacity:1;pointer-events:auto}
+  .modal-box{background:var(--mat);color:var(--chu);border:1px solid var(--vien);border-radius:14px;max-width:680px;width:100%;max-height:88vh;display:flex;flex-direction:column;box-shadow:0 12px 36px rgba(0,0,0,0.3);overflow:hidden}
+  .modal-header{padding:14px 18px;border-bottom:1px solid var(--vien);display:flex;align-items:center;justify-content:space-between;background:var(--nen)}
+  .modal-header h3{margin:0;font-size:17px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .modal-close{background:transparent;border:none;font-size:20px;cursor:pointer;color:var(--phu);padding:4px 8px}
+  .modal-body{padding:16px 18px;overflow-y:auto;display:flex;flex-direction:column;gap:14px;font-size:14px}
+  .agent-card{background:var(--nen);border:1px solid var(--vien);border-radius:10px;padding:12px 14px}
+  .agent-card h4{margin:0 0 6px 0;font-size:13px;text-transform:uppercase;letter-spacing:0.04em;color:var(--chinh);display:flex;align-items:center;gap:6px}
+  .agent-card p{margin:0;line-height:1.5}
+  .debate-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  @media (max-width:540px){.debate-grid{grid-template-columns:1fr}}
+  .bull-card{background:var(--mua-nen);border:1px solid rgba(18,122,74,0.25);border-radius:10px;padding:12px 14px}
+  .bear-card{background:var(--ban-nen);border:1px solid rgba(179,38,30,0.25);border-radius:10px;padding:12px 14px}
+  .bull-card h4{color:var(--mua);margin:0 0 6px 0;font-size:13px;text-transform:uppercase}
+  .bear-card h4{color:var(--ban);margin:0 0 6px 0;font-size:13px;text-transform:uppercase}
+  .cio-card{background:var(--ai-nen);border:1px solid var(--ai-vien);border-radius:10px;padding:12px 14px}
+  .cio-card h4{color:var(--ai);margin:0 0 6px 0;font-size:13px;text-transform:uppercase}
+  </style>
+</head>
+<body>
+
+<main>
+  <header class="dau">
+    <div>
+      <h1>Bàn Ghép Cặp H4 & TradingAgents AI</h1>
+      <div class="trangthai" id="trangthai">Đang tải dữ liệu…</div>
+    </div>
+    <div class="header-actions">
+      <button id="doiGiaoDien" type="button" title="Đổi chế độ Sáng / Tối">🌓 Giao diện</button>
+      <button id="taiLai" type="button">Tải lại</button>
+    </div>
+  </header>
+
+  <div class="mau" id="mau" hidden>Đây là dữ liệu mẫu từ phân tích. Trang sẽ tự thay bằng dữ liệu thật sau lần chạy đầu tiên.</div>
+
+  <section>
+    <h2 id="tieuDeSucManh">Sức mạnh tiền tệ (% từ giá mở cửa ngày)</h2>
+    <div class="sm" id="sucManh"></div>
+  </section>
+
+  <section>
+    <h2>Lệnh đề xuất (Kèm Hội Đồng TradingAgents AI)</h2>
+    <div class="lenh" id="lenh"></div>
+  </section>
+
+  <section id="khuCanhBao" hidden>
+    <h2>Lưu ý rủi ro danh mục</h2>
+    <ul class="canhbao" id="canhBao"></ul>
+  </section>
+
+  <section>
+    <h2>Mô hình có nhưng bị loại</h2>
+    <div class="bang"><table>
+      <thead><tr><th>Cặp</th><th>Hướng mô hình</th><th>Mô hình</th><th>Nến đóng lúc</th><th>Chênh lệch</th><th>Lý do</th></tr></thead>
+      <tbody id="loai"></tbody>
+    </table></div>
+  </section>
+
+  <section class="cach">
+    <h2>Quy tắc vận hành hệ thống</h2>
+    <ol>
+      <li><b>Tầng 1 (Định lượng):</b> Tìm mô hình nến đảo chiều trên <span id="cdGan">3</span> nến 4 giờ vừa đóng, nằm ở đỉnh hoặc đáy của <span id="cdDinh">12</span> nến gần nhất. Chênh lệch sức mạnh đồng Mua - đồng Bán tối thiểu <span id="cdChenh">0,15</span>%.</li>
+      <li><b>Thời điểm đo CSM:</b> 8 giờ đầu ngày giao dịch (05:00–13:00 VN) đo theo 24 giờ gần nhất; sau 13:00 đo từ giá mở cửa ngày.</li>
+      <li><b>Quản lý vốn & Lệnh chờ:</b> Cắt lỗ ngoài mô hình + 0.1 ATR. Mục tiêu là đỉnh/đáy của <span id="cdMuc">20</span> nến gần nhất. Nếu R:R &lt; 1:1,5, hệ thống tự động gợi ý <b>Giá Chờ Limit</b> để kéo R:R về chuẩn 1:1,5.</li>
+      <li><b>Tầng 2 (TradingAgents AI):</b> Bấm nút "🤖 Thẩm định TradingAgents AI" trên mỗi lệnh để xem phân tích vĩ mô, cản đa khung thời gian và biên bản tranh luận Bull vs Bear trước khi vào lệnh.</li>
+    </ol>
+  </section>
+</main>
+
+<!-- Modal TradingAgents AI -->
+<div class="modal-overlay" id="modalAI" onclick="dongAI(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <h3 id="modalTieuDe">🏛️ Hội Đồng TradingAgents AI</h3>
+      <button class="modal-close" onclick="dongAI()" type="button">&times;</button>
+    </div>
+    <div class="modal-body" id="modalNoiDung"></div>
+  </div>
+</div>
+
+<script>
+let duLieuGoc = { dat: [] };
+const $=id=>document.getElementById(id);
+const so=v=>String(v).replace('.',',');
+
+// Chuyển đổi Theme Dark / Light
+$('doiGiaoDien').addEventListener('click', ()=>{
+  const hienTai = document.documentElement.getAttribute('data-theme');
+  const tiepTheo = hienTai === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', tiepTheo);
+  localStorage.setItem('theme_h4', tiepTheo);
+});
+if(localStorage.getItem('theme_h4')){
+  document.documentElement.setAttribute('data-theme', localStorage.getItem('theme_h4'));
+}
+
+function veSucManh(ds){
+  const lonNhat=Math.max(...ds.map(x=>Math.abs(x.phan_tram)),0.01);
+  $('sucManh').innerHTML=ds.map(x=>{
+    const w=(Math.abs(x.phan_tram)/lonNhat*100).toFixed(0);
+    const am=x.phan_tram<0;
+    return `<span class="ten">${x.tien}</span>
+      <div class="ray trai">${am?`<i style="width:${w}%"></i>`:''}</div>
+      <div class="ray phai">${am?'':`<i style="width:${w}%"></i>`}</div>
+      <span class="gt so">${x.phan_tram>0?'+':''}${so(x.phan_tram.toFixed(2))}%</span>`;
+  }).join('');
+}
+
+function veLenh(ds){
+  if(!ds.length){$('lenh').innerHTML='<div class="trong">Nến 4 giờ vừa đóng không có cặp nào đạt cả hai điều kiện. Chờ nến tiếp theo.</div>';return;}
+  $('lenh').innerHTML=ds.map((d,k)=>`<article class="the">
+    <div class="tren"><span class="huong ${d.huong}">${d.huong}</span><span class="cap">${d.cap}</span><span class="stt">#${k+1}</span></div>
+    <div class="mh">${d.mo_hinh} · nến đóng ${d.gio_nen}</div>
+    ${d.nen?`<div class="bdbox"><canvas class="bd" data-k="${k}" role="img" aria-label="Biểu đồ nến 4 giờ ${d.cap}"></canvas></div>`:''}
+    <div class="cs">
+      <div><span>Giá lúc quét</span><span class="so">${d.gia}</span></div>
+      <div><span>Chênh sức mạnh</span><span class="so">${so(d.chenh.toFixed(2))}</span></div>
+      <div><span>Cắt lỗ</span><span class="so">${d.cat_lo}</span></div>
+      <div><span>Mục tiêu</span><span class="so">${d.muc_tieu}</span></div>
+      <div><span>Lời/lỗ</span><span class="so">1:${so(d.loi_lo)}</span></div>
+    </div>
+    ${d.gia_cho?`<div class="cho">Nên chờ giá hồi về <b class="so">${d.gia_cho}</b> để lời/lỗ đạt 1:1,5</div>`:''}
+    <button class="btn-ai" type="button" onclick="moAI(${k})">🤖 Xem Thẩm Định TradingAgents AI</button>
+  </article>`).join('');
+  document.querySelectorAll('canvas.bd').forEach(c=>veBieuDo(c,ds[+c.dataset.k]));
+}
+
+function veBieuDo(cv,d){
+  const st=getComputedStyle(document.documentElement),tk=n=>st.getPropertyValue(n).trim();
+  const XANH=tk('--mua'),DO=tk('--ban'),LAM=tk('--chinh'),XAM=tk('--phu'),VIEN=tk('--vien');
+  const W=cv.parentElement.clientWidth,H=220,dpr=devicePixelRatio||1;
+  cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';
+  const g=cv.getContext('2d');g.scale(dpr,dpr);
+  const n=d.nen,vao=d.gia_cho||d.gia,mua=d.huong==='MUA',PH=64,N=n.length+3;
+  let lo=Math.min(...n.map(x=>x[3]),d.cat_lo,d.muc_tieu),hi=Math.max(...n.map(x=>x[2]),d.cat_lo,d.muc_tieu);
+  const p=(hi-lo)*0.06;lo-=p;hi+=p;
+  const y=v=>8+(hi-v)/(hi-lo)*(H-16),cw=(W-PH)/N,x=k=>k*cw+cw/2;
+  const i=d.chi_so_mh,s=d.so_nen_mh||1,x0=x(i)+cw/2,x1=W-PH;
+  g.globalAlpha=0.18;g.fillStyle='#e8a317';g.fillRect(x(i-s+1)-cw/2,0,cw*s,H);
+  g.globalAlpha=0.12;g.fillStyle=DO;g.fillRect(x0,Math.min(y(vao),y(d.cat_lo)),x1-x0,Math.abs(y(vao)-y(d.cat_lo)));
+  g.fillStyle=XANH;g.fillRect(x0,Math.min(y(vao),y(d.muc_tieu)),x1-x0,Math.abs(y(vao)-y(d.muc_tieu)));
+  g.globalAlpha=1;
+  n.forEach((b,k)=>{const m=b[4]>=b[1]?XANH:DO;g.strokeStyle=g.fillStyle=m;g.lineWidth=1;g.beginPath();g.moveTo(x(k),y(b[2]));g.lineTo(x(k),y(b[3]));g.stroke();
+    g.fillRect(x(k)-cw*0.32,Math.min(y(b[1]),y(b[4])),cw*0.64,Math.max(1,Math.abs(y(b[1])-y(b[4]))));});
+  const dong=[[d.muc_tieu,XANH,'Mục tiêu'],[vao,LAM,d.gia_cho?'Lệnh chờ':'Vào lệnh'],[d.cat_lo,DO,'Cắt lỗ']];
+  if(d.gia_cho) dong.push([d.gia,XAM,'Hiện tại']);
+  dong.forEach(([v,m])=>{g.strokeStyle=m;g.lineWidth=1.5;g.setLineDash(m===XAM?[3,3]:[]);g.beginPath();g.moveTo(m===XAM?0:x0,y(v));g.lineTo(x1,y(v));g.stroke();});
+  g.setLineDash([]);g.font='600 10px "Be Vietnam Pro",sans-serif';g.textBaseline='middle';
+  let truoc=-99;dong.sort((a,b)=>y(a[0])-y(b[0])).forEach(([v,m,t])=>{let yy=Math.max(y(v),truoc+24);truoc=yy;
+    g.fillStyle=m;g.fillRect(x1+3,yy-11,PH-4,22);g.fillStyle='#fff';g.fillText(t,x1+6,yy-5);g.fillText(String(v),x1+6,yy+5);});
+  g.strokeStyle=VIEN;g.strokeRect(0.5,0.5,W-PH,H-1);
+}
+
+function veLoai(ds){
+  $('loai').innerHTML=ds.length?ds.map(d=>`<tr><td><b>${d.cap}</b></td><td>${d.huong}</td><td>${d.mo_hinh}</td><td class="so">${d.gio_nen}</td><td class="so">${so(d.chenh.toFixed(2))}</td><td>${d.ly_do}</td></tr>`).join('')
+    :'<tr><td colspan="6">Không có mô hình nào bị loại.</td></tr>';
+}
+
+// Modal Thẩm Định TradingAgents AI
+function moAI(k){
+  const d = duLieuGoc.dat[k];
+  if(!d) return;
+  const isMua = d.huong === 'MUA';
+  $('modalTieuDe').innerHTML = `🏛️ Thẩm Định TradingAgents AI: <span style="color:${isMua?'var(--mua)':'var(--ban)'}">${d.huong} ${d.cap}</span>`;
+  
+  $('modalNoiDung').innerHTML = `
+    <div class="agent-card">
+      <h4>🏛️ 1. Tác Tử Vĩ Mô & Ngân Hàng Trung Ương (Macro News Agent)</h4>
+      <p><b>Đồng tiền liên quan:</b> ${d.goc} và ${d.dinh}.<br>
+      • Chênh lệch sức mạnh dòng tiền: <b>${d.chenh > 0 ? '+' : ''}${so(d.chenh)}%</b> ủng hộ vị thế ${d.huong}.<br>
+      • <b>Khuyến cáo tin tức:</b> Luôn kiểm tra Forex Factory trước khi kích hoạt. Nếu có tin lãi suất, CPI hoặc Non-Farm trong vòng 4 giờ tới, tạm hoãn vào lệnh để tránh quét râu nến.</p>
+    </div>
+
+    <div class="agent-card">
+      <h4>📈 2. Tác Tử Kỹ Thuật Đa Khung (Multi-TF Agent)</h4>
+      <p>• <b>Khung H4:</b> Xuất hiện cụm nến <i>${d.mo_hinh}</i> tại vị trí cực trị 12 nến H4. Điểm cắt lỗ ngoài mô hình tại <b>${d.cat_lo}</b>.<br>
+      • <b>Khung D1:</b> Kiểm tra xem hướng ${d.huong} có đang đâm vào vùng cản cản tuần hoặc vùng Order Block (OB) đối diện hay không.<br>
+      • <b>Khung M15:</b> Chờ xác nhận tạo cấu trúc đảo chiều vi mô (CHoCH / đáy sau cao hơn đối với Mua).</p>
+    </div>
+
+    <div class="debate-grid">
+      <div class="bull-card">
+        <h4>🟢 Luận Điểm Phe Mua (Bull Case)</h4>
+        <p>• Dòng tiền CSM đo lường định lượng xác nhận ${isMua ? d.goc : d.dinh} đang có sức mua áp đảo.<br>
+        • Cụm nến đảo chiều hình thành tại vùng hỗ trợ/đáy vững chắc.<br>
+        • Tỷ lệ R:R hướng tới mục tiêu đỉnh/đáy 20 nến đạt mức hấp dẫn.</p>
+      </div>
+      <div class="bear-card">
+        <h4>🔴 Phản Biện Phe Bán (Bear Risks)</h4>
+        <p>• Cảnh báo bẫy thanh khoản (Liquidity sweep) nếu thị trường giật quét qua râu nến.<br>
+        • Rủi ro phân kỳ RSI hoặc khối lượng giao dịch suy giảm trong các phiên giao dịch giáp phiên Mỹ.<br>
+        • Cần tuân thủ tuyệt đối mức dừng lỗ tại ${d.cat_lo}.</p>
+      </div>
+    </div>
+
+    <div class="cio-card">
+      <h4>⚖️ 3. Phê Duyệt & Quản Trị Rủi Ro (CIO Agent Decision)</h4>
+      <p>• <b>Phương thức vào lệnh:</b> ${d.gia_cho ? `<b>ĐẶT LỆNH CHỜ (LIMIT) tại ${d.gia_cho}</b> (để bảo đảm tỷ lệ R:R đạt 1:1,5)` : `<b>VÀO LỆNH NGAY (MARKET) tại ${d.gia}</b>`}<br>
+      • <b>Cắt lỗ (SL):</b> ${d.cat_lo} | <b>Mục tiêu (TP):</b> ${d.muc_tieu}<br>
+      • <b>Tỷ lệ Lời/Lỗ (R:R):</b> 1 : ${so(d.loi_lo)}<br>
+      • <b>Khối lượng:</b> Tối đa 1% rủi ro tài khoản. Nếu đang nắm giữ các cặp khác chứa đồng ${isMua ? d.goc : d.dinh}, hãy giảm 50% khối lượng (Split Lot).</p>
+    </div>
+  `;
+  $('modalAI').classList.add('open');
+}
+
+function dongAI(e){
+  $('modalAI').classList.remove('open');
+}
+
+async function tai(){
+  try{
+    const r=await fetch('data.json?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok) throw new Error(r.status);
+    const d=await r.json();
+    duLieuGoc = d;
+    $('trangthai').textContent=`Cập nhật ${d.cap_nhat} · nến 4 giờ vừa đóng lúc ${d.nen_4_gio_dong} (giờ Việt Nam) · đọc được ${d.so_cap_doc_duoc}/28 cặp`;
+    $('mau').hidden=!d.du_lieu_mau;
+    $('tieuDeSucManh').textContent='Sức mạnh tiền tệ (% '+(d.cach_do||'từ giá mở cửa ngày')+')';
+    veSucManh(d.suc_manh); veLenh(d.dat); veLoai(d.loai||[]);
+    $('khuCanhBao').hidden=!(d.canh_bao&&d.canh_bao.length);
+    $('canhBao').innerHTML=(d.canh_bao||[]).map(c=>`<li>${c}</li>`).join('');
+    const c=d.cai_dat||{};
+    if(c.so_nen_gan_nhat){$('cdGan').textContent=c.so_nen_gan_nhat;$('cdDinh').textContent=c.so_nen_dinh_day;$('cdChenh').textContent=so(c.chenh_toi_thieu);$('cdMuc').textContent=c.so_nen_muc_tieu;}
+  }catch(e){
+    $('trangthai').textContent='Không đọc được dữ liệu. Bấm Tải lại sau ít phút.';
+  }
+}
+$('taiLai').addEventListener('click',tai);
+tai();
+setInterval(tai,5*60*1000);
+</script>
+</body>
+</html>

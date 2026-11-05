@@ -1,0 +1,47 @@
+name: Quet nen 4 gio va suc manh tien te
+
+on:
+  schedule:
+    # Chạy mỗi giờ vào phút thứ 7 từ Thứ Hai đến Thứ Sáu (giờ UTC)
+    - cron: "7 * * * 1-5"
+  workflow_dispatch:
+    inputs:
+      luon_gui:
+        description: "Gửi Telegram ngay cả khi chưa có nến 4 giờ mới (gõ: co)"
+        required: false
+        default: "co"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: quet-nen
+  cancel-in-progress: false
+
+jobs:
+  quet:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Cai dat thu vien phu tro
+        run: |
+          python -m pip install --upgrade pip
+          pip install matplotlib
+      - name: Phan tich va gui Telegram
+        env:
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          DIA_CHI_WEB: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+          LUON_GUI_TELEGRAM: ${{ github.event.inputs.luon_gui }}
+        run: python phan_tich.py
+      - name: Luu ket qua len trang web
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data.json
+          git diff --cached --quiet || git commit -m "Cập nhật dữ liệu thị trường nến 4 giờ và sức mạnh tiền tệ"
+          git pull --rebase origin main
+          git push
