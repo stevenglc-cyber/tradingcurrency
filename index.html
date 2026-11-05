@@ -217,9 +217,9 @@
   </section>
 
   <section>
-    <h2>Mô hình nến có nhưng bị loại (Bấm 'Soi Chart' để xem)</h2>
+    <h2>5 Cặp Mạnh – Yếu Đang Theo Dõi</h2>
     <div class="bang"><table>
-      <thead><tr><th>Cặp</th><th>Hướng</th><th>Mô hình</th><th>Nến đóng</th><th>Chênh lệch</th><th>Lý do</th><th>Biểu đồ</th></tr></thead>
+      <thead><tr><th>Cặp</th><th>Hướng</th><th>Chênh lệch sức mạnh</th><th>Mô hình nến đảo chiều</th><th>Biểu đồ Sonic R</th></tr></thead>
       <tbody id="loai"></tbody>
     </table></div>
   </section>
@@ -231,8 +231,11 @@
         • <b>Dải Rồng (Dragon):</b> Gồm 3 đường <b>EMA 34 High, EMA 34 Close, EMA 34 Low</b> (màu xanh dương). Nến nằm trên Dải Rồng = Ưu tiên MUA; nến nằm dưới Dải Rồng = Ưu tiên BÁN.<br>
         • <b>Đường Xu Hướng:</b> <b>EMA 89</b> (đường màu cam) là ranh giới xu hướng quyết định. <b>EMA 200</b> (đường màu tím) đóng vai trò cản xu hướng lớn.
       </li>
-      <li><b>Tầng 1 (Định lượng):</b> Tìm mô hình nến đảo chiều trên <span id="cdGan">3</span> nến 4 giờ vừa đóng, nằm ở đỉnh hoặc đáy của <span id="cdDinh">12</span> nến gần nhất. Chênh lệch sức mạnh đồng Mua - đồng Bán tối thiểu <span id="cdChenh">0,15</span>%.</li>
-      <li><b>Quản lý vốn:</b> Cắt lỗ ngoài mô hình + 0.1 ATR. Mục tiêu đỉnh/đáy <span id="cdMuc">20</span> nến. Nếu R:R &lt; 1:1,5, hệ thống gợi ý <b>Giá Chờ Limit</b> để tỷ lệ đạt chuẩn 1:1,5.</li>
+      <li><b>Chọn 5 cặp mạnh – yếu (MarketMilk Standard):</b>
+        Chỉ tập trung vào 5 cặp tiềm năng nhất: đồng mạnh nhất ghép với 3 đồng yếu nhất, và đồng yếu nhất ghép với 3 đồng mạnh nhất. Luôn mua đồng mạnh, bán đồng yếu, và chỉ nhận mô hình nến cùng hướng sức mạnh tiền tệ. Sức mạnh đo % từ giá mở cửa ngày của sàn MT5. Trong 2 giờ đầu ngày, dùng sức mạnh của cả ngày hôm trước.
+      </li>
+      <li><b>Mô hình nến đảo chiều H4:</b> Nhấn chìm, búa, sao băng, sao mai, sao hôm, đáy nhíp, đỉnh nhíp, xuyên đâm, mây đen, quét đáy, quét đỉnh, phá giả nến mẹ (fakey), ba nến trong, ba lính trắng, ba quạ đen nằm ở đỉnh/đáy <span id="cdDinh">12</span> nến gần nhất.</li>
+      <li><b>Quản lý vốn & Lệnh chờ Limit:</b> Cắt lỗ ngoài đỉnh/đáy mô hình + 0.1 ATR. Mục tiêu đỉnh/đáy <span id="cdMuc">20</span> nến. Nếu R:R &lt; 1:1,5, hệ thống gợi ý <b>Giá Chờ Limit</b> hồi về để tỷ lệ đạt chuẩn 1:1,5.</li>
       <li><b>Tầng 2 (TradingAgents AI):</b> Bấm "🤖 Xem Thẩm Định TradingAgents AI" để đọc biên bản phản biện Bull vs Bear, vĩ mô và cản đa khung thời gian.</li>
     </ol>
   </section>
@@ -364,8 +367,9 @@ function veMainTradingView(tenCap){
   const el = $('tradingview_main_container');
   if(!el) return;
 
-  // Tìm nến của cặp từ dat, loai hoặc tat_ca_nen
+  // Tìm nến của cặp từ dat, theo_doi, loai hoặc tat_ca_nen
   let dongInfo = (duLieuGoc.dat || []).find(d => d.cap === tenCap) || 
+                 (duLieuGoc.theo_doi || []).find(d => d.cap === tenCap) ||
                  (duLieuGoc.loai || []).find(d => d.cap === tenCap);
   
   let nen = null;
@@ -377,7 +381,10 @@ function veMainTradingView(tenCap){
 
   // Cập nhật phụ đề cặp tiền
   if(dongInfo){
-    $('tenCapDangXem').innerHTML = `<b>${tenCap}</b> · Khung 4 giờ (H4) · ${dongInfo.huong === 'MUA' ? '🟢' : '🔴'} Mô hình: <i>${dongInfo.mo_hinh}</i> · Chênh CSM: ${dongInfo.chenh>0?'+':''}${so(dongInfo.chenh)}%`;
+    const huongIcon = dongInfo.huong === 'MUA' ? '🟢' : '🔴';
+    const mhText = dongInfo.mo_hinh || dongInfo.trang_thai || 'Chờ mô hình';
+    const chenhVal = dongInfo.chenh !== undefined ? Math.abs(dongInfo.chenh) : 0;
+    $('tenCapDangXem').innerHTML = `<b>${tenCap}</b> · Khung 4 giờ (H4) · ${huongIcon} ${dongInfo.huong} · <i>${mhText}</i> · Chênh CSM: +${so(chenhVal.toFixed(2))}%`;
   } else {
     $('tenCapDangXem').innerHTML = `<b>${tenCap}</b> · Khung 4 giờ (H4) · Dải Rồng Sonic R`;
   }
@@ -571,7 +578,7 @@ function veSucManh(ds){
 
 function veLenh(ds){
   if(!ds.length){
-    $('lenh').innerHTML='<div class="trong">Nến 4 giờ vừa đóng chưa có cặp nào đồng pha cả 2 điều kiện (CSM ≥ 0.15% + Nến đảo chiều).<br>👉 Anh hãy bấm nút <b>📊 Soi Chart</b> ở bảng bên dưới để soi biểu đồ TradingView & Dải Rồng Sonic R của từng cặp!</div>';
+    $('lenh').innerHTML='<div class="trong">Trong 5 cặp mạnh – yếu, chưa cặp nào có mô hình nến đảo chiều đúng hướng. Chờ nến tiếp theo.<br>👉 Anh hãy bấm nút <b>📊 Soi Chart</b> ở bảng 5 cặp theo dõi bên dưới để soi cấu trúc và Dải Rồng Sonic R!</div>';
     return;
   }
 
@@ -585,7 +592,7 @@ function veLenh(ds){
       <div class="mh">${d.mo_hinh} · nến đóng ${d.gio_nen}</div>
       <div class="cs">
         <div><span>Giá lúc quét</span><span class="so">${d.gia}</span></div>
-        <div><span>Chênh sức mạnh</span><span class="so ${d.chenh>=0?'chenh-duong':'chenh-am'}">${d.chenh>0?'+':''}${so(d.chenh.toFixed(2))}</span></div>
+        <div><span>Chênh sức mạnh</span><span class="so ${d.chenh>=0?'chenh-duong':'chenh-am'}">${d.chenh>0?'+':''}${so(d.chenh.toFixed(2))}%</span></div>
         <div><span>Cắt lỗ (SL)</span><span class="so" style="color:var(--ban);font-weight:600">${d.cat_lo}</span></div>
         <div><span>Mục tiêu (TP)</span><span class="so" style="color:var(--mua);font-weight:600">${d.muc_tieu}</span></div>
         <div><span>Lời/lỗ</span><span class="so">1:${so(d.loi_lo)}</span></div>
@@ -599,7 +606,7 @@ function veLenh(ds){
 
 function veLoai(ds){
   if(!ds.length){
-    $('loai').innerHTML='<tr><td colspan="7">Không có mô hình nào bị loại.</td></tr>';
+    $('loai').innerHTML='<tr><td colspan="5">Chưa có dữ liệu 5 cặp theo dõi.</td></tr>';
     return;
   }
   $('loai').innerHTML=ds.map(d=>{
@@ -607,16 +614,18 @@ function veLoai(ds){
     const badge = isMua 
       ? `<span class="badge-huong MUA"><span class="dot xanh"></span>MUA</span>` 
       : `<span class="badge-huong BAN"><span class="dot do"></span>BÁN</span>`;
-    const chenhHtml = d.chenh >= 0 
-      ? `<span class="so chenh-duong">+${so(d.chenh.toFixed(2))}</span>` 
-      : `<span class="so chenh-am">${so(d.chenh.toFixed(2))}</span>`;
+    const chenhVal = typeof d.chenh === 'number' ? d.chenh : parseFloat(d.chenh) || 0;
+    const chenhHtml = `<span class="so chenh-duong">+${so(chenhVal.toFixed(2))}%</span>`;
+    const trangThai = d.trang_thai || d.mo_hinh || 'Chờ mô hình';
+    const coMoHinh = trangThai !== 'Chưa có mô hình đảo chiều' && trangThai !== 'Chờ mô hình';
+    const ttHtml = coMoHinh 
+      ? `<b style="color:var(--mua)">✅ ${trangThai}</b>` 
+      : `<span style="color:var(--phu)">Chờ mô hình</span>`;
     return `<tr>
       <td><b>${d.cap}</b></td>
       <td>${badge}</td>
-      <td>${d.mo_hinh}</td>
-      <td class="so">${d.gio_nen}</td>
       <td>${chenhHtml}</td>
-      <td><span class="lydo-tag">${d.ly_do}</span></td>
+      <td>${ttHtml}</td>
       <td><button class="btn-soi" type="button" onclick="soiCap('${d.cap}')">📊 Soi Chart</button></td>
     </tr>`;
   }).join('');
@@ -629,6 +638,7 @@ function capNhatDanhSachChon(){
   
   let dsCap = [];
   (duLieuGoc.dat || []).forEach(d => { if(!dsCap.includes(d.cap)) dsCap.push(d.cap); });
+  (duLieuGoc.theo_doi || []).forEach(d => { if(!dsCap.includes(d.cap)) dsCap.push(d.cap); });
   (duLieuGoc.loai || []).forEach(d => { if(!dsCap.includes(d.cap)) dsCap.push(d.cap); });
   if(duLieuGoc.tat_ca_nen){
     Object.keys(duLieuGoc.tat_ca_nen).forEach(c => { if(!dsCap.includes(c)) dsCap.push(c); });
@@ -710,7 +720,7 @@ async function tai(){
     $('tieuDeSucManh').textContent='Sức mạnh tiền tệ (% '+(d.cach_do||'từ giá mở cửa ngày')+')';
     veSucManh(d.suc_manh); 
     veLenh(d.dat); 
-    veLoai(d.loai||[]);
+    veLoai(d.theo_doi || d.loai || []);
     capNhatDanhSachChon();
     veMainTradingView(capDangChon);
 
