@@ -66,13 +66,16 @@ def lech_gio_san(ts):
             return int(dt.utcoffset().total_seconds()) + 7 * 3600
         except Exception:
             pass
-    # Dự phòng chuẩn xác khi môi trường thiếu tzdata (như Windows mặc định)
+    # Dự phòng chuẩn xác khi môi trường thiếu tzdata
     dt_utc = datetime.fromtimestamp(ts, timezone.utc)
     y = dt_utc.year
-    start_day = (14 - (datetime(y, 3, 1).weekday() + 1) % 7) or 14
-    start_dst = datetime(y, 3, start_day, 7, tzinfo=timezone.utc)
-    end_day = (7 - (datetime(y, 11, 1).weekday() + 1) % 7) or 7
-    end_dst = datetime(y, 11, end_day, 6, tzinfo=timezone.utc)
+    first_sun_mar = (6 - datetime(y, 3, 1).weekday()) % 7 + 1
+    second_sun_mar = first_sun_mar + 7
+    start_dst = datetime(y, 3, second_sun_mar, 7, tzinfo=timezone.utc)
+
+    first_sun_nov = (6 - datetime(y, 11, 1).weekday()) % 7 + 1
+    end_dst = datetime(y, 11, first_sun_nov, 6, tzinfo=timezone.utc)
+
     offset_seconds = -4 * 3600 if start_dst <= dt_utc < end_dst else -5 * 3600
     return offset_seconds + 7 * 3600
 
@@ -538,6 +541,7 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
     return {
         "cap_nhat": datetime.fromtimestamp(bay_gio, GIO_VN).strftime("%H:%M %d/%m/%Y"),
         "nen_4_gio_dong": gio_vn(nen_dong_moi_nhat) if nen_dong_moi_nhat else "",
+        "ma_nen": nen_dong_moi_nhat,
         "nen_dong_ts": nen_dong_moi_nhat,
         "so_cap_doc_duoc": len(tho),
         "cach_do": cach_do,
