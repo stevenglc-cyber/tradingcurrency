@@ -78,6 +78,13 @@
   .legend-badge.ema200{background:rgba(168,85,247,0.12);color:#9333ea}
   .legend-badge.ema610{background:rgba(225,29,72,0.12);color:#e11d48}
   .tv-main-chart{width:100%;height:380px;position:relative}
+  .tv-sub-pane{border-top:1px solid var(--vien);background:var(--mat)}
+  .tv-sub-header{padding:6px 12px;background:var(--mat);border-bottom:1px solid var(--vien);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px}
+  .tv-sub-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+  .vsa-chart{width:100%;height:115px;position:relative}
+  .rsi-chart{width:100%;height:125px;position:relative}
+  .vsa-pill{display:inline-flex;align-items:center;gap:4px;font-weight:600;color:var(--phu)}
+  .vsa-dot{width:8px;height:8px;border-radius:2px;display:inline-block}
 
   .mau{background:var(--canh-nen);color:var(--canh);border-radius:8px;padding:10px 14px;font-size:14px}
   .sm{display:grid;grid-template-columns:44px 1fr 1fr 64px;gap:8px 6px;align-items:center;background:var(--mat);border:1px solid var(--vien);border-radius:12px;padding:14px}
@@ -202,6 +209,7 @@
         </div>
         <select id="chonCapTien" class="select-cap" onchange="doiCapXem(this.value)"></select>
         <button id="nutToggleSonic" class="btn-toggle-sonic" type="button" onclick="toggleSonicR()">🐉 Dải Rồng: BẬT</button>
+        <button id="nutToggleVsaRsi" class="btn-toggle-sonic" type="button" onclick="toggleVsaRsi()">📊 VSA & RSI: BẬT</button>
         <button id="nutAIHeader" class="btn-ai-nav" type="button" onclick="moAITheoCap(capDangChon)">🏛️ Thẩm Định TradingAgents AI</button>
       </div>
     </div>
@@ -215,6 +223,34 @@
         <span id="tvThongTinGia" class="legend-badge" style="background:var(--nen);color:var(--chu);font-family:var(--chu-so)"></span>
       </div>
       <div id="tradingview_main_container" class="tv-main-chart"></div>
+      <div id="khu_vsa_rsi">
+        <div class="tv-sub-pane">
+          <div class="tv-sub-header">
+            <div class="tv-sub-legend">
+              <b style="color:var(--chu)">📊 VSA Volume (PVA)</b>
+              <span class="vsa-pill"><span class="vsa-dot" style="background:#00e676"></span>Climax Mua</span>
+              <span class="vsa-pill"><span class="vsa-dot" style="background:#ff1744"></span>Climax Bán</span>
+              <span class="vsa-pill"><span class="vsa-dot" style="background:#38bdf8"></span>Vol Tăng</span>
+              <span class="vsa-pill"><span class="vsa-dot" style="background:rgba(148,163,184,0.45)"></span>Cạn cung/cầu</span>
+              <span class="vsa-pill"><span class="vsa-dot" style="background:#eab308"></span>MA(20)</span>
+            </div>
+            <span id="vsaThongTin" class="so" style="color:var(--chu);font-weight:600"></span>
+          </div>
+          <div id="tradingview_vsa_container" class="vsa-chart"></div>
+        </div>
+        <div class="tv-sub-pane">
+          <div class="tv-sub-header">
+            <div class="tv-sub-legend">
+              <b style="color:var(--chu)">📈 RSI(14) Wilder</b>
+              <span class="vsa-pill"><span class="vsa-dot" style="background:#a855f7"></span>RSI(14)</span>
+              <span class="vsa-pill"><span class="vsa-dot" style="background:#eab308"></span>SMA(14)</span>
+              <span class="vsa-pill" style="font-family:var(--chu-so)">70 / 50 / 30</span>
+            </div>
+            <span id="rsiThongTin" class="so" style="color:var(--chu);font-weight:600"></span>
+          </div>
+          <div id="tradingview_rsi_container" class="rsi-chart"></div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -275,9 +311,12 @@
 <script>
 let duLieuGoc = { dat: [], loai: [], theo_doi: [], tat_ca_nen: {} };
 let mainChart = null;
+let vsaChart = null;
+let rsiChart = null;
 let currentCandleSeries = null;
 let sonicSeriesList = [];
 let hienThiSonic = true;
+let hienThiVsaRsi = true;
 let capDangChon = "";
 let currentInterval = '240'; // '15', '240', 'D'
 
@@ -380,6 +419,131 @@ function toggleSonicR(){
   sonicSeriesList.forEach(s => s.applyOptions({ visible: hienThiSonic }));
 }
 
+// Bật / Tắt tầng VSA Volume & RSI
+function toggleVsaRsi(){
+  hienThiVsaRsi = !hienThiVsaRsi;
+  $('nutToggleVsaRsi').textContent = hienThiVsaRsi ? '📊 VSA & RSI: BẬT' : '📊 VSA & RSI: TẮT';
+  const khu = $('khu_vsa_rsi');
+  if(khu) khu.hidden = !hienThiVsaRsi;
+  if(mainChart){
+    mainChart.timeScale().applyOptions({ visible: !hienThiVsaRsi });
+  }
+  if(hienThiVsaRsi && capDangChon){
+    veMainTradingView(capDangChon);
+  }
+}
+
+// Tính VSA Volume (Tick Volume Proxy chuẩn VSA cho Spot Forex) + MA(20) + Phân loại Climax / Rising / No Supply-Demand
+function tinhVSAVolume(nen){
+  if(!nen || !nen.length) return { bars: [], ma20: [], map: new Map() };
+  const spreads = nen.map(b => Math.max(b[2] - b[3], 1e-8));
+  const atr20 = [];
+  let sumSp = 0;
+  for(let i = 0; i < spreads.length; i++){
+    sumSp += spreads[i];
+    if(i >= 20) sumSp -= spreads[i - 20];
+    atr20.push(sumSp / Math.min(i + 1, 20));
+  }
+
+  const rawVols = nen.map((b, i) => {
+    const o = b[1], h = b[2], l = b[3], c = b[4];
+    const sp = spreads[i];
+    const body = Math.abs(c - o);
+    const rwT = h - Math.max(o, c);
+    const rwD = Math.min(o, c) - l;
+    const utcHour = new Date(b[0] * 1000).getUTCHours();
+    const sessionWeight = (utcHour >= 12 && utcHour <= 17) ? 1.25 : ((utcHour >= 7 && utcHour <= 21) ? 1.10 : 0.85);
+    const wickBonus = ((rwT + rwD) / sp) * 0.35;
+    const bodyBonus = (body / sp) * 0.25;
+    return Math.max(10, Math.round((sp / Math.max(atr20[i], 1e-8)) * 100 * (1 + wickBonus + bodyBonus) * sessionWeight));
+  });
+
+  const bars = [];
+  const ma20 = [];
+  const map = new Map();
+  let sumVol = 0;
+
+  for(let i = 0; i < nen.length; i++){
+    sumVol += rawVols[i];
+    if(i >= 20) sumVol -= rawVols[i - 20];
+    const maVal = Math.round(sumVol / Math.min(i + 1, 20));
+    const maSp = atr20[i];
+
+    const t = nen[i][0], o = nen[i][1], h = nen[i][2], l = nen[i][3], c = nen[i][4];
+    const sp = spreads[i];
+    const rwT = h - Math.max(o, c);
+    const rwD = Math.min(o, c) - l;
+    const vol = rawVols[i];
+
+    let color, nhan;
+    if(vol >= 1.5 * maVal){
+      const isStoppingBull = (rwD >= 0.55 * sp && rwD > rwT) || (c >= o && !(rwT >= 0.55 * sp && rwT > rwD));
+      if(isStoppingBull){
+        color = '#00e676';
+        nhan = '🔥 Cao trào Mua (Climax / Stopping Vol)';
+      } else {
+        color = '#ff1744';
+        nhan = '🔥 Cao trào Bán (Climax / Upthrust)';
+      }
+    } else if(vol >= 1.1 * maVal){
+      color = c >= o ? '#38bdf8' : '#fb7185';
+      nhan = '⚡ Dòng tiền tăng (Rising Vol)';
+    } else if(vol <= 0.75 * maVal && sp <= 0.85 * maSp){
+      color = c >= o ? 'rgba(16,185,129,0.35)' : 'rgba(239,68,68,0.35)';
+      nhan = c >= o ? '💧 Cạn cầu (No Demand)' : '💧 Cạn cung (No Supply - Test tốt)';
+    } else {
+      color = c >= o ? 'rgba(16,185,129,0.72)' : 'rgba(239,68,68,0.72)';
+      nhan = 'Bình thường';
+    }
+
+    bars.push({ time: t, value: vol, color });
+    ma20.push({ time: t, value: maVal });
+    map.set(t, { vol, ma: maVal, nhan, color });
+  }
+
+  return { bars, ma20, map };
+}
+
+// Tính RSI(14) chuẩn Wilder + SMA(14) Signal
+function tinhRSI(nen, chuKy = 14, maChuKy = 14){
+  if(!nen || nen.length <= chuKy) return { rsi: [], sma: [], map: new Map() };
+  let gainSum = 0, lossSum = 0;
+  for(let i = 1; i <= chuKy; i++){
+    const diff = nen[i][4] - nen[i - 1][4];
+    if(diff >= 0) gainSum += diff;
+    else lossSum -= diff;
+  }
+  let avgGain = gainSum / chuKy;
+  let avgLoss = lossSum / chuKy;
+  const calc = (g, l) => l === 0 ? (g === 0 ? 50 : 100) : 100 - (100 / (1 + g / l));
+
+  const rsi = [{ time: nen[chuKy][0], value: Number(calc(avgGain, avgLoss).toFixed(2)) }];
+  for(let i = chuKy + 1; i < nen.length; i++){
+    const diff = nen[i][4] - nen[i - 1][4];
+    avgGain = (avgGain * (chuKy - 1) + Math.max(diff, 0)) / chuKy;
+    avgLoss = (avgLoss * (chuKy - 1) + Math.max(-diff, 0)) / chuKy;
+    rsi.push({ time: nen[i][0], value: Number(calc(avgGain, avgLoss).toFixed(2)) });
+  }
+
+  const sma = [];
+  const map = new Map();
+  let sumRsi = 0;
+  for(let i = 0; i < rsi.length; i++){
+    sumRsi += rsi[i].value;
+    if(i >= maChuKy) sumRsi -= rsi[i - maChuKy].value;
+    let smaVal = null;
+    if(i >= maChuKy - 1){
+      smaVal = Number((sumRsi / maChuKy).toFixed(2));
+      sma.push({ time: rsi[i].time, value: smaVal });
+    }
+    const val = rsi[i].value;
+    const status = val >= 70 ? 'Quá mua (≥70)' : (val <= 30 ? 'Quá bán (≤30)' : (val >= 50 ? 'Động lượng tăng' : 'Động lượng giảm'));
+    map.set(rsi[i].time, { rsi: val, sma: smaVal, status });
+  }
+
+  return { rsi, sma, map };
+}
+
 // Chuyển cặp tiền trên trạm biểu đồ TradingView
 function doiCapXem(tenCap){
   capDangChon = tenCap;
@@ -430,6 +594,14 @@ function veMainTradingView(tenCap){
     try{ mainChart.remove(); }catch(e){}
     mainChart = null;
   }
+  if(vsaChart){
+    try{ vsaChart.remove(); }catch(e){}
+    vsaChart = null;
+  }
+  if(rsiChart){
+    try{ rsiChart.remove(); }catch(e){}
+    rsiChart = null;
+  }
   sonicSeriesList = [];
 
   // Lấy dữ liệu nến đa khung (M15 / H4 / 1D) từ data.json
@@ -439,8 +611,11 @@ function veMainTradingView(tenCap){
     nen = nenDaKhung;
   }
 
+  const khuSub = $('khu_vsa_rsi');
+
   // Nếu không có dữ liệu cho cặp này (ví dụ các cặp ngoài top 5 khi chọn M15/1D): Nhúng TradingView Interactive
   if(!nen || !nen.length){
+    if(khuSub) khuSub.hidden = true;
     el.innerHTML = `
       <div style="height:100%;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--mat)">
         <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_widget&symbol=FX%3A${symbolCode}&interval=${currentInterval}&hidesidetoolbar=0&symboledit=1&saveimage=1&toolbarbg=f1f3f6&studies=EMA%40tv-basicstudies%1FEMA%40tv-basicstudies%1FEMA%40tv-basicstudies%1FEMA%40tv-basicstudies%1FEMA%40tv-basicstudies&theme=${isDark?'dark':'light'}&style=1&timezone=Asia%2FHo_Chi_Minh" 
@@ -450,34 +625,47 @@ function veMainTradingView(tenCap){
     return;
   }
 
+  if(khuSub) khuSub.hidden = !hienThiVsaRsi;
   el.innerHTML = '';
-  
+  const elVsa = $('tradingview_vsa_container');
+  const elRsi = $('tradingview_rsi_container');
+  if(elVsa) elVsa.innerHTML = '';
+  if(elRsi) elRsi.innerHTML = '';
+
+  const chartBg = isDark ? '#17212a' : '#ffffff';
+  const chartText = isDark ? '#9aa8b3' : '#5a6874';
+  const chartGrid = isDark ? '#23303d' : '#f0f3f6';
+  const chartBorder = isDark ? '#2a3742' : '#dde3e8';
+  const crossColor = isDark ? '#475569' : '#cbd5e1';
+
   mainChart = LightweightCharts.createChart(el, {
     width: el.clientWidth,
     height: 380,
     layout: {
-      background: { type: 'solid', color: isDark ? '#17212a' : '#ffffff' },
-      textColor: isDark ? '#9aa8b3' : '#5a6874',
+      background: { type: 'solid', color: chartBg },
+      textColor: chartText,
       fontSize: 11,
       fontFamily: '"IBM Plex Mono", monospace'
     },
     grid: {
-      vertLines: { color: isDark ? '#23303d' : '#f0f3f6' },
-      horzLines: { color: isDark ? '#23303d' : '#f0f3f6' },
+      vertLines: { color: chartGrid },
+      horzLines: { color: chartGrid },
     },
     crosshair: {
       mode: LightweightCharts.CrosshairMode.Normal,
-      vertLine: { width: 1, color: isDark ? '#475569' : '#cbd5e1', style: LightweightCharts.LineStyle.Dashed },
-      horzLine: { width: 1, color: isDark ? '#475569' : '#cbd5e1', style: LightweightCharts.LineStyle.Dashed },
+      vertLine: { width: 1, color: crossColor, style: LightweightCharts.LineStyle.Dashed },
+      horzLine: { width: 1, color: crossColor, style: LightweightCharts.LineStyle.Dashed },
     },
     rightPriceScale: {
-      borderColor: isDark ? '#2a3742' : '#dde3e8',
+      borderColor: chartBorder,
+      minimumWidth: 68,
       scaleMargins: { top: 0.1, bottom: 0.1 },
     },
     timeScale: {
-      borderColor: isDark ? '#2a3742' : '#dde3e8',
+      borderColor: chartBorder,
       timeVisible: true,
       secondsVisible: false,
+      visible: !hienThiVsaRsi,
     },
     handleScroll: { mouseWheel: true, pressedMouseMove: true },
     handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
@@ -609,27 +797,176 @@ function veMainTradingView(tenCap){
     });
   }
 
-  // Cập nhật giá nến mới nhất vào thanh legend
+  // Tính toán & Vẽ VSA Volume + RSI(14) ở 2 tầng dưới và đồng bộ hóa với đồ thị chính
+  const vsaData = tinhVSAVolume(nen);
+  const rsiData = tinhRSI(nen, 14, 14);
   const nCuoi = nen[nen.length - 1];
-  $('tvThongTinGia').textContent = `Giá: ${nCuoi[4]} | O: ${nCuoi[1]} H: ${nCuoi[2]} L: ${nCuoi[3]}`;
+  const lastVsa = vsaData.map.get(nCuoi[0]);
+  const lastRsi = rsiData.map.get(nCuoi[0]);
 
-  // Crosshair move handler
-  mainChart.subscribeCrosshairMove(param => {
-    if(!param || !param.time){
-      $('tvThongTinGia').textContent = `Giá: ${nCuoi[4]} | O: ${nCuoi[1]} H: ${nCuoi[2]} L: ${nCuoi[3]}`;
-      return;
+  const setDefaultLegends = () => {
+    $('tvThongTinGia').textContent = `Giá: ${nCuoi[4]} | O: ${nCuoi[1]} H: ${nCuoi[2]} L: ${nCuoi[3]}`;
+    if($('vsaThongTin')){
+      $('vsaThongTin').textContent = lastVsa ? `Vol: ${lastVsa.vol} | MA20: ${lastVsa.ma} · ${lastVsa.nhan}` : '';
     }
-    const cData = param.seriesData.get(currentCandleSeries);
-    if(cData){
-      $('tvThongTinGia').textContent = `Đóng: ${cData.close} | Mở: ${cData.open} | Cao: ${cData.high} | Thấp: ${cData.low}`;
+    if($('rsiThongTin')){
+      $('rsiThongTin').textContent = lastRsi ? `RSI(14): ${lastRsi.rsi}${lastRsi.sma !== null ? ' | SMA: ' + lastRsi.sma : ''} · ${lastRsi.status}` : '';
     }
-  });
+  };
+  setDefaultLegends();
+
+  let vsaVolSeries = null;
+  let rsiSeries = null;
+
+  if(hienThiVsaRsi && elVsa && elRsi){
+    const subChartOpts = (height, showTime) => ({
+      width: el.clientWidth,
+      height,
+      layout: {
+        background: { type: 'solid', color: chartBg },
+        textColor: chartText,
+        fontSize: 10.5,
+        fontFamily: '"IBM Plex Mono", monospace'
+      },
+      grid: {
+        vertLines: { color: chartGrid },
+        horzLines: { color: chartGrid },
+      },
+      crosshair: {
+        mode: LightweightCharts.CrosshairMode.Normal,
+        vertLine: { width: 1, color: crossColor, style: LightweightCharts.LineStyle.Dashed },
+        horzLine: { width: 1, color: crossColor, style: LightweightCharts.LineStyle.Dashed },
+      },
+      rightPriceScale: {
+        borderColor: chartBorder,
+        minimumWidth: 68,
+        scaleMargins: { top: 0.12, bottom: 0.08 },
+      },
+      timeScale: {
+        borderColor: chartBorder,
+        timeVisible: true,
+        secondsVisible: false,
+        visible: showTime,
+      },
+      handleScroll: { mouseWheel: true, pressedMouseMove: true },
+      handleScale: { axisPressedMouseMove: true, mouseWheel: true, pinch: true },
+    });
+
+    // Tầng 2: VSA Volume
+    vsaChart = LightweightCharts.createChart(elVsa, subChartOpts(115, false));
+    vsaVolSeries = vsaChart.addHistogramSeries({
+      priceFormat: { type: 'volume' },
+      priceLineVisible: false,
+      lastValueVisible: true,
+      title: 'VSA',
+    });
+    vsaVolSeries.setData(vsaData.bars);
+
+    const vsaMaSeries = vsaChart.addLineSeries({
+      color: '#eab308',
+      lineWidth: 1.5,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      title: 'MA20',
+    });
+    vsaMaSeries.setData(vsaData.ma20);
+
+    // Tầng 3: RSI(14) + SMA(14)
+    rsiChart = LightweightCharts.createChart(elRsi, subChartOpts(125, true));
+    rsiSeries = rsiChart.addLineSeries({
+      color: '#a855f7',
+      lineWidth: 1.8,
+      priceLineVisible: false,
+      lastValueVisible: true,
+      title: 'RSI14',
+      autoscaleInfoProvider: () => ({ priceRange: { minValue: 10, maxValue: 90 } }),
+    });
+    if(rsiData.rsi.length){
+      rsiSeries.setData(rsiData.rsi);
+      rsiSeries.createPriceLine({ price: 70, color: '#ef4444', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: '70' });
+      rsiSeries.createPriceLine({ price: 50, color: '#64748b', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted, axisLabelVisible: false });
+      rsiSeries.createPriceLine({ price: 30, color: '#10b981', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: '30' });
+    }
+    const rsiSmaSeries = rsiChart.addLineSeries({
+      color: '#eab308',
+      lineWidth: 1.3,
+      priceLineVisible: false,
+      lastValueVisible: false,
+      title: 'SMA14',
+    });
+    if(rsiData.sma.length) rsiSmaSeries.setData(rsiData.sma);
+
+    // Đồng bộ hóa Zoom / Pan giữa 3 đồ thị
+    let isSyncingRange = false;
+    const charts = [mainChart, vsaChart, rsiChart];
+    charts.forEach(src => {
+      src.timeScale().subscribeVisibleLogicalRangeChange(range => {
+        if(isSyncingRange || !range) return;
+        isSyncingRange = true;
+        charts.forEach(dst => {
+          if(dst !== src){
+            try{ dst.timeScale().setVisibleLogicalRange(range); }catch(e){}
+          }
+        });
+        isSyncingRange = false;
+      });
+    });
+
+    // Đồng bộ Crosshair và cập nhật Legend giữa 3 đồ thị
+    let isSyncingCross = false;
+    const syncCrosshair = (src, param) => {
+      if(isSyncingCross) return;
+      isSyncingCross = true;
+      if(!param || !param.time){
+        setDefaultLegends();
+        charts.forEach(dst => {
+          if(dst !== src && dst.clearCrosshairPosition) try{ dst.clearCrosshairPosition(); }catch(e){}
+        });
+        isSyncingCross = false;
+        return;
+      }
+      const t = param.time;
+      const bar = nen.find(b => b[0] === t);
+      if(bar){
+        $('tvThongTinGia').textContent = `Đóng: ${bar[4]} | Mở: ${bar[1]} | Cao: ${bar[2]} | Thấp: ${bar[3]}`;
+        if(src !== mainChart && mainChart.setCrosshairPosition) try{ mainChart.setCrosshairPosition(bar[4], t, currentCandleSeries); }catch(e){}
+      }
+      const v = vsaData.map.get(t);
+      if(v && $('vsaThongTin')){
+        $('vsaThongTin').textContent = `Vol: ${v.vol} | MA20: ${v.ma} · ${v.nhan}`;
+        if(src !== vsaChart && vsaChart.setCrosshairPosition) try{ vsaChart.setCrosshairPosition(v.vol, t, vsaVolSeries); }catch(e){}
+      }
+      const r = rsiData.map.get(t);
+      if($('rsiThongTin')){
+        $('rsiThongTin').textContent = r ? `RSI(14): ${r.rsi}${r.sma !== null ? ' | SMA: ' + r.sma : ''} · ${r.status}` : '';
+        if(r && src !== rsiChart && rsiChart.setCrosshairPosition) try{ rsiChart.setCrosshairPosition(r.rsi, t, rsiSeries); }catch(e){}
+      }
+      isSyncingCross = false;
+    };
+    mainChart.subscribeCrosshairMove(p => syncCrosshair(mainChart, p));
+    vsaChart.subscribeCrosshairMove(p => syncCrosshair(vsaChart, p));
+    rsiChart.subscribeCrosshairMove(p => syncCrosshair(rsiChart, p));
+  } else {
+    mainChart.subscribeCrosshairMove(param => {
+      if(!param || !param.time){
+        setDefaultLegends();
+        return;
+      }
+      const cData = param.seriesData.get(currentCandleSeries);
+      if(cData){
+        $('tvThongTinGia').textContent = `Đóng: ${cData.close} | Mở: ${cData.open} | Cao: ${cData.high} | Thấp: ${cData.low}`;
+      }
+    });
+  }
 
   mainChart.timeScale().fitContent();
-
-  window.addEventListener('resize', () => {
-    if(el && el.clientWidth && mainChart) mainChart.applyOptions({ width: el.clientWidth });
-  });
+  if(vsaChart || rsiChart){
+    const r = mainChart.timeScale().getVisibleLogicalRange();
+    if(r){
+      if(vsaChart) vsaChart.timeScale().setVisibleLogicalRange(r);
+      if(rsiChart) rsiChart.timeScale().setVisibleLogicalRange(r);
+    }
+  }
 }
 
 function veSucManh(ds){
@@ -947,6 +1284,12 @@ async function tai(){
 $('taiLai').addEventListener('click',tai);
 tai();
 window.addEventListener('resize', () => {
+  const el = $('tradingview_main_container');
+  if(el && el.clientWidth){
+    if(mainChart) mainChart.applyOptions({ width: el.clientWidth });
+    if(vsaChart) vsaChart.applyOptions({ width: el.clientWidth });
+    if(rsiChart) rsiChart.applyOptions({ width: el.clientWidth });
+  }
   if (duLieuGoc && duLieuGoc.dat) {
     document.querySelectorAll('canvas.bd').forEach(c => veBieuDo(c, duLieuGoc.dat[+c.dataset.k]));
   }
