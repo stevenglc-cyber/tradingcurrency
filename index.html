@@ -204,6 +204,7 @@
           <button type="button" class="btn-tf" id="tf_m15" onclick="doiKhungThoiGian('15', 'm15')">M15</button>
           <button type="button" class="btn-tf active" id="tf_h4" onclick="doiKhungThoiGian('240', 'h4')">H4</button>
           <button type="button" class="btn-tf" id="tf_d1" onclick="doiKhungThoiGian('D', 'd1')">1D</button>
+          <button type="button" class="btn-tf" id="tf_w1" onclick="doiKhungThoiGian('W', 'w1')">1W</button>
         </div>
         <select id="chonCapTien" class="select-cap" onchange="doiCapXem(this.value)"></select>
         <button id="nutToggleSonic" class="btn-toggle-sonic" type="button" onclick="toggleSonicR()">🐉 Dải Rồng: BẬT</button>
@@ -631,19 +632,12 @@ function veMainTradingView(tenCap){
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark' || 
                  (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches && !document.documentElement.getAttribute('data-theme'));
   const symbolCode = (tenCap || 'NZDUSD').replace('/', '');
-  const tfName = currentInterval === '15' ? '15 Phút (M15)' : (currentInterval === 'D' ? '1 Ngày (D1)' : '4 Giờ (H4)');
+  const tfName = currentInterval === '15' ? '15 Phút (M15)' : (currentInterval === 'D' ? '1 Ngày (D1)' : (currentInterval === 'W' ? '1 Tuần (W1)' : '4 Giờ (H4)'));
 
   // Tìm nến của cặp từ dat, theo_doi, loai hoặc tat_ca_nen
   let dongInfo = (duLieuGoc.dat || []).find(d => d.cap === tenCap) || 
                  (duLieuGoc.theo_doi || []).find(d => d.cap === tenCap) ||
                  (duLieuGoc.loai || []).find(d => d.cap === tenCap);
-  
-  let nen = null;
-  if(duLieuGoc.tat_ca_nen && duLieuGoc.tat_ca_nen[tenCap]){
-    nen = duLieuGoc.tat_ca_nen[tenCap];
-  } else if(dongInfo && dongInfo.nen && dongInfo.nen.length){
-    nen = dongInfo.nen;
-  }
 
   // Cập nhật phụ đề cặp tiền
   if(dongInfo){
@@ -662,11 +656,18 @@ function veMainTradingView(tenCap){
   sonicSeriesList = [];
   vsaRsiSeriesList = [];
 
-  // Lấy dữ liệu nến đa khung (M15 / H4 / 1D) từ data.json
+  // Lấy dữ liệu nến đa khung (M15 / H4 / 1D / 1W) từ data.json
+  let nen = null;
   const daKhungCap = duLieuGoc.da_khung && duLieuGoc.da_khung[tenCap];
   const nenDaKhung = daKhungCap && daKhungCap[currentInterval];
   if(nenDaKhung && nenDaKhung.length){
     nen = nenDaKhung;
+  } else if(currentInterval === '240'){
+    if(duLieuGoc.tat_ca_nen && duLieuGoc.tat_ca_nen[tenCap]){
+      nen = duLieuGoc.tat_ca_nen[tenCap];
+    } else if(dongInfo && dongInfo.nen && dongInfo.nen.length){
+      nen = dongInfo.nen;
+    }
   }
 
   const barSub = $('tvVsaRsiBar');
@@ -724,7 +725,7 @@ function veMainTradingView(tenCap){
     },
     timeScale: {
       borderColor: chartBorder,
-      timeVisible: true,
+      timeVisible: currentInterval === '15' || currentInterval === '240',
       secondsVisible: false,
     },
     handleScroll: { mouseWheel: true, pressedMouseMove: true },

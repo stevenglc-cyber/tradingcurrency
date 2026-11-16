@@ -188,9 +188,9 @@ def dong_goi_nen_kem_ema(bars, so_le=5, so_nen_lay=150):
 
 
 def lay_nen_15m_va_1d(ten_cap, so_le=5):
-    """Lấy dữ liệu nến M15 và 1D (Daily) từ Yahoo Finance cho Sonic R."""
+    """Lấy dữ liệu nến M15, 1D (Daily) và 1W (Weekly) từ Yahoo Finance cho Sonic R."""
     sym = ten_cap.replace('/', '')
-    kq = {"15": [], "D": []}
+    kq = {"15": [], "D": [], "W": []}
     
     # 1. Khung M15 (60 ngày ~ 5700 nến để tính EMA 610)
     try:
@@ -219,6 +219,20 @@ def lay_nen_15m_va_1d(ten_cap, so_le=5):
         kq["D"] = dong_goi_nen_kem_ema(barsd, so_le, 150)
     except Exception as e:
         print(f"Lỗi lấy 1d {sym}: {e}")
+
+    # 3. Khung 1W (15 năm ~ 780 nến tuần để tính đủ EMA 610)
+    try:
+        urlw = f"https://query1.finance.yahoo.com/v8/finance/chart/{sym}=X?interval=1wk&range=15y"
+        req = urllib.request.Request(urlw, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=12) as r:
+            resw = json.load(r)["chart"]["result"][0]
+        tw = resw["timestamp"]
+        qw = resw["indicators"]["quote"][0]
+        barsw = [[tw[i], qw["open"][i], qw["high"][i], qw["low"][i], qw["close"][i]]
+                 for i in range(len(tw)) if qw["close"][i] is not None]
+        kq["W"] = dong_goi_nen_kem_ema(barsw, so_le, 150)
+    except Exception as e:
+        print(f"Lỗi lấy 1wk {sym}: {e}")
 
     return kq
 
@@ -566,7 +580,7 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
         if d["cap"] not in cac_cap_can_lay:
             cac_cap_can_lay.append(d["cap"])
 
-    print(f"Đang tải nến M15 và 1D kèm Sonic R cho {len(cac_cap_can_lay)} cặp theo dõi...")
+    print(f"Đang tải nến M15, 1D và 1W kèm Sonic R cho {len(cac_cap_can_lay)} cặp theo dõi...")
     for ten_cap in cac_cap_can_lay:
         so = 3 if "JPY" in ten_cap else 5
         parts = ten_cap.split('/')
@@ -587,6 +601,7 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
                 "15": pack_m15_d1.get("15", []),
                 "240": pack_h4,
                 "D": pack_m15_d1.get("D", []),
+                "W": pack_m15_d1.get("W", []),
             }
 
     return {
