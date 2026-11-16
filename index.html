@@ -232,8 +232,6 @@
           <b style="color:var(--chu);margin-left:4px">📈 RSI(14):</b>
           <span class="vsa-pill"><span class="vsa-dot" style="background:#a855f7"></span>RSI</span>
           <span class="vsa-pill"><span class="vsa-dot" style="background:#eab308"></span>SMA14</span>
-          <span class="vsa-pill"><span class="vsa-dot" style="background:#00e676"></span>PK Tăng</span>
-          <span class="vsa-pill"><span class="vsa-dot" style="background:#ff1744"></span>PK Giảm</span>
         </div>
         <div style="display:flex;flex-wrap:wrap;gap:10px;align-items:center">
           <span id="vsaThongTin" class="so" style="color:var(--chu);font-weight:600"></span>
@@ -542,74 +540,6 @@ function tinhRSI(nen, chuKy = 14, maChuKy = 14){
   return { rsi, sma, map };
 }
 
-// Phát hiện tự động Phân kỳ Tăng (Bullish) & Phân kỳ Giảm (Bearish) của RSI(14)
-function timPhanKyRSI(nen, rsiMap){
-  if(!nen || nen.length < 20) return [];
-  const startIdx = nen.length > 25 ? 14 : 2;
-  const lows = [];
-  const highs = [];
-
-  for(let i = startIdx; i <= nen.length - 2; i++){
-    const right = (i === nen.length - 2) ? 1 : 2;
-    let isLow = true, isHigh = true;
-    for(let k = i - 2; k <= i + right; k++){
-      if(k === i) continue;
-      if((k < i && nen[k][3] <= nen[i][3]) || (k > i && nen[k][3] < nen[i][3])) isLow = false;
-      if((k < i && nen[k][2] >= nen[i][2]) || (k > i && nen[k][2] > nen[i][2])) isHigh = false;
-    }
-
-    if(isLow){
-      let minR = Infinity;
-      for(let k = Math.max(1, i - 1); k <= Math.min(nen.length - 1, i + 1); k++){
-        const info = rsiMap.get(nen[k][0]);
-        if(info && info.rsi < minR) minR = info.rsi;
-      }
-      if(Number.isFinite(minR)) lows.push({ idx: i, time: nen[i][0], price: nen[i][3], rsi: minR });
-    }
-
-    if(isHigh){
-      let maxR = -Infinity;
-      for(let k = Math.max(1, i - 1); k <= Math.min(nen.length - 1, i + 1); k++){
-        const info = rsiMap.get(nen[k][0]);
-        if(info && info.rsi > maxR) maxR = info.rsi;
-      }
-      if(Number.isFinite(maxR)) highs.push({ idx: i, time: nen[i][0], price: nen[i][2], rsi: maxR });
-    }
-  }
-
-  const divs = [];
-  for(let b = 1; b < lows.length; b++){
-    const l2 = lows[b];
-    for(let a = b - 1; a >= 0; a--){
-      const l1 = lows[a];
-      const dist = l2.idx - l1.idx;
-      if(dist < 3) continue;
-      if(dist > 35) break;
-      if(l2.price < l1.price && l2.rsi >= l1.rsi + 1.5 && l1.rsi <= 48){
-        divs.push({ loai: 'BULL', t1: l1.time, t2: l2.time, p1: l1.price, p2: l2.price, r1: l1.rsi, r2: l2.rsi });
-        break;
-      }
-    }
-  }
-
-  for(let b = 1; b < highs.length; b++){
-    const h2 = highs[b];
-    for(let a = b - 1; a >= 0; a--){
-      const h1 = highs[a];
-      const dist = h2.idx - h1.idx;
-      if(dist < 3) continue;
-      if(dist > 35) break;
-      if(h2.price > h1.price && h2.rsi <= h1.rsi - 1.5 && h1.rsi >= 52){
-        divs.push({ loai: 'BEAR', t1: h1.time, t2: h2.time, p1: h1.price, p2: h2.price, r1: h1.rsi, r2: h2.rsi });
-        break;
-      }
-    }
-  }
-
-  divs.sort((x, y) => x.t2 - y.t2);
-  return divs.slice(-5);
-}
-
 // Chuyển cặp tiền trên trạm biểu đồ TradingView
 function doiCapXem(tenCap){
   capDangChon = tenCap;
@@ -855,13 +785,9 @@ function veMainTradingView(tenCap){
     });
   }
 
-  // GỘP VSA VOLUME (Tầng giữa) & RSI(14) + PHÂN KỲ (Tầng đáy) VÀO CÙNG 1 CHART DUY NHẤT ĐỂ ĐỒNG BỘ 100% TỪNG CÂY NẾN
+  // GỘP VSA VOLUME (Tầng giữa) & RSI(14) (Tầng đáy) VÀO CÙNG 1 CHART DUY NHẤT ĐỂ ĐỒNG BỘ 100% TỪNG CÂY NẾN
   const vsaData = tinhVSAVolume(nen);
   const rsiData = tinhRSI(nen, 14, 14);
-  const phanKyList = timPhanKyRSI(nen, rsiData.map);
-  const pkSummary = phanKyList.length
-    ? ` · 🔍 ${phanKyList.length} PK (${phanKyList[phanKyList.length - 1].loai === 'BULL' ? '🟢 Tăng' : '🔴 Giảm'})`
-    : '';
   const nCuoi = nen[nen.length - 1];
   const lastVsa = vsaData.map.get(nCuoi[0]);
   const lastRsi = rsiData.map.get(nCuoi[0]);
@@ -872,7 +798,7 @@ function veMainTradingView(tenCap){
       $('vsaThongTin').textContent = lastVsa ? `Vol: ${lastVsa.vol} (MA20: ${lastVsa.ma}) · ${lastVsa.nhan}` : '';
     }
     if($('rsiThongTin')){
-      $('rsiThongTin').textContent = lastRsi ? `RSI(14): ${lastRsi.rsi}${lastRsi.sma !== null ? ' | SMA: ' + lastRsi.sma : ''} · ${lastRsi.status}${pkSummary}` : '';
+      $('rsiThongTin').textContent = lastRsi ? `RSI(14): ${lastRsi.rsi}${lastRsi.sma !== null ? ' | SMA: ' + lastRsi.sma : ''} · ${lastRsi.status}` : '';
     }
   };
   setDefaultLegends();
@@ -937,48 +863,6 @@ function veMainTradingView(tenCap){
 
   vsaRsiSeriesList = [vsaVolSeries, vsaMaSeries, rsiSeries, rsiSmaSeries];
 
-  // Kẻ đường Phân kỳ RSI trực tiếp trên đồ thị RSI (nét liền) và đồ thị Giá (nét đứt) + gắn Marker
-  if(phanKyList.length){
-    const markers = [];
-    phanKyList.forEach(pk => {
-      const isBull = pk.loai === 'BULL';
-      const color = isBull ? '#00e676' : '#ff1744';
-      const rsiLine = mainChart.addLineSeries({
-        priceScaleId: 'rsi',
-        color,
-        lineWidth: 2.2,
-        priceLineVisible: false,
-        lastValueVisible: false,
-        crosshairMarkerVisible: false,
-        visible: hienThiVsaRsi,
-      });
-      rsiLine.setData([{ time: pk.t1, value: pk.r1 }, { time: pk.t2, value: pk.r2 }]);
-
-      const priceLine = mainChart.addLineSeries({
-        priceScaleId: 'right',
-        color,
-        lineWidth: 1.6,
-        lineStyle: LightweightCharts.LineStyle.Dashed,
-        priceLineVisible: false,
-        lastValueVisible: false,
-        crosshairMarkerVisible: false,
-        visible: hienThiVsaRsi,
-      });
-      priceLine.setData([{ time: pk.t1, value: pk.p1 }, { time: pk.t2, value: pk.p2 }]);
-
-      vsaRsiSeriesList.push(rsiLine, priceLine);
-      markers.push({
-        time: pk.t2,
-        position: isBull ? 'belowBar' : 'aboveBar',
-        color,
-        shape: isBull ? 'arrowUp' : 'arrowDown',
-        text: isBull ? 'PK Tăng' : 'PK Giảm',
-      });
-    });
-    markers.sort((a, b) => a.time - b.time);
-    rsiSeries.setMarkers(markers);
-  }
-
   // 1 Crosshair duy nhất xuyên suốt cả 3 tầng
   mainChart.subscribeCrosshairMove(param => {
     if(!param || !param.time){
@@ -996,7 +880,7 @@ function veMainTradingView(tenCap){
     }
     const r = rsiData.map.get(t);
     if($('rsiThongTin')){
-      $('rsiThongTin').textContent = r ? `RSI(14): ${r.rsi}${r.sma !== null ? ' | SMA: ' + r.sma : ''} · ${r.status}${pkSummary}` : '';
+      $('rsiThongTin').textContent = r ? `RSI(14): ${r.rsi}${r.sma !== null ? ' | SMA: ' + r.sma : ''} · ${r.status}` : '';
     }
   });
 
