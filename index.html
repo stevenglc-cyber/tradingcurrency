@@ -917,31 +917,12 @@ function dongAI(e){
 
 async function tai(){
   try{
-    const ts = Date.now();
-    const [rLocal, rGoc] = await Promise.allSettled([
-      fetch('data.json?t=' + ts, {cache: 'no-store'}),
-      fetch('https://kingtip518.github.io/SucManh_Nen_H4/data.json?t=' + ts, {cache: 'no-store'})
-    ]);
-
-    let d = null;
-    if(rLocal.status === 'fulfilled' && rLocal.value.ok){
-      d = await rLocal.value.json();
-    }
-    let goc = null;
-    if(rGoc.status === 'fulfilled' && rGoc.value.ok){
-      try{ goc = await rGoc.value.json(); }catch(e){}
-    }
-
-    if(!d && !goc) throw new Error('Không đọc được dữ liệu');
-    if(!d) d = {};
-    if(goc && goc.suc_manh){
-      const keys = ['cap_nhat', 'nen_4_gio_dong', 'ma_nen', 'so_cap_doc_duoc', 'cach_do', 'nguong', 'suc_manh', 'dat', 'theo_doi', 'canh_bao', 'cai_dat'];
-      keys.forEach(k => { if(goc[k] !== undefined) d[k] = goc[k]; });
-      d.du_lieu_mau = goc.du_lieu_mau || false;
-    }
+    const r = await fetch('data.json?t=' + Date.now(), {cache: 'no-store'});
+    if(!r.ok) throw new Error(r.status);
+    const d = await r.json();
 
     duLieuGoc = d;
-    $('trangthai').textContent=`Cập nhật ${d.cap_nhat} · nến 4 giờ vừa đóng lúc ${d.nen_4_gio_dong} (GMT+7) · đọc được ${d.so_cap_doc_duoc}/28 cặp${goc ? ' · đồng bộ trực tiếp bản gốc' : ''}`;
+    $('trangthai').textContent=`Cập nhật ${d.cap_nhat} · nến 4 giờ vừa đóng lúc ${d.nen_4_gio_dong} (GMT+7) · đọc được ${d.so_cap_doc_duoc}/28 cặp`;
     $('mau').hidden=!d.du_lieu_mau;
     $('tieuDeSucManh').textContent='Sức mạnh tiền tệ (% '+(d.cach_do||'từ giá mở cửa ngày')+')';
     const ng=d.nguong;

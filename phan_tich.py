@@ -429,18 +429,6 @@ def thay_doi_phan_tram(nen_gio, moc_dau, moc_cuoi):
     return (gia_cuoi - gia_dau) / gia_dau * 100
 
 
-def lay_du_lieu_goc_kingtip():
-    """Đồng bộ dữ liệu sức mạnh & tín hiệu chuẩn từ trang gốc kingtip518 (nếu khả dụng)."""
-    url = f"https://kingtip518.github.io/SucManh_Nen_H4/data.json?t={int(time.time())}"
-    try:
-        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
-        with urllib.request.urlopen(req, timeout=15) as r:
-            return json.load(r)
-    except Exception as e:
-        print(f"Không lấy được data.json gốc để đối chiếu: {e}")
-        return None
-
-
 def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
     bay_gio = bay_gio or int(time.time())
     tong = [0.0] * 8
@@ -570,19 +558,6 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
         "tien_manh": TIEN[manh_nhat], "tien_yeu": TIEN[yeu_nhat],
     }
     suc_manh_ds = [{"tien": TIEN[c], "phan_tram": round(suc_manh[c], 2)} for c in xep_hang]
-
-    # Đồng bộ dữ liệu sức mạnh & tín hiệu chuẩn từ trang gốc kingtip518 (nếu khả dụng)
-    goc = lay_du_lieu_goc_kingtip() if lay_nen is lay_nen_gio else None
-    if goc and goc.get("ma_nen", 0) >= nen_dong_moi_nhat and goc.get("suc_manh"):
-        suc_manh_ds = goc.get("suc_manh", suc_manh_ds)
-        nguong_dict = goc.get("nguong", nguong_dict)
-        theo_doi = goc.get("theo_doi", theo_doi)
-        dat = goc.get("dat", dat)
-        canh_bao = goc.get("canh_bao", canh_bao)
-        cap_nhat_str = goc.get("cap_nhat", cap_nhat_str)
-        nen_4_gio_dong_str = goc.get("nen_4_gio_dong", nen_4_gio_dong_str)
-        nen_dong_moi_nhat = goc.get("ma_nen", nen_dong_moi_nhat)
-        cach_do = goc.get("cach_do", cach_do)
 
     # Tạo kho dữ liệu đa khung (M15, H4, 1D) kèm trọn bộ Sonic R (EMA 34 H/C/L, 89, 200, 610)
     da_khung = {}
