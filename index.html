@@ -112,11 +112,11 @@
   
   /* Bảng Mô Hình Bị Loại & Badges */
   .bang{overflow-x:auto;background:var(--mat);border:1px solid var(--vien);border-radius:12px}
-  table{border-collapse:collapse;width:100%;font-size:13px;min-width:620px}
-  th,td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--vien);vertical-align:middle}
-  th{color:var(--phu);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.04em}
-  tr:last-child td{border-bottom:none}
-  tbody tr:hover{background:var(--table-hover)}
+  .bang table{border-collapse:collapse;width:100%;font-size:13px;min-width:620px}
+  .bang th,.bang td{text-align:left;padding:10px 14px;border-bottom:1px solid var(--vien);vertical-align:middle}
+  .bang th{color:var(--phu);font-weight:600;font-size:12px;text-transform:uppercase;letter-spacing:0.04em}
+  .bang tr:last-child td{border-bottom:none}
+  .bang tbody tr:hover{background:var(--table-hover)}
   
   /* Badge Hướng Mua / Bán dạng nút tròn */
   .badge-huong{display:inline-flex;align-items:center;gap:6px;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:700;letter-spacing:0.04em}
@@ -420,7 +420,7 @@ function toggleVsaRsi(){
   if(mainChart){
     mainChart.applyOptions({
       height: hienThiVsaRsi ? 620 : 380,
-      leftPriceScale: { visible: hienThiVsaRsi },
+      leftPriceScale: { visible: false },
     });
     mainChart.priceScale('right').applyOptions({
       scaleMargins: hienThiVsaRsi ? { top: 0.02, bottom: 0.48 } : { top: 0.08, bottom: 0.08 },
@@ -718,10 +718,7 @@ function veMainTradingView(tenCap){
       scaleMargins: hienThiVsaRsi ? { top: 0.02, bottom: 0.48 } : { top: 0.08, bottom: 0.08 },
     },
     leftPriceScale: {
-      visible: hienThiVsaRsi,
-      borderColor: chartBorder,
-      minimumWidth: 42,
-      scaleMargins: { top: 0.70, bottom: 0.02 },
+      visible: false,
     },
     timeScale: {
       borderColor: chartBorder,
@@ -905,26 +902,26 @@ function veMainTradingView(tenCap){
     visible: false,
   });
 
-  // Tầng đáy (70% -> 98% - cao 28%): RSI(14) & SMA(14) gắn vào leftPriceScale để soi phân kỳ
+  // Tầng đáy (70% -> 98% - cao 28%): RSI(14) & SMA(14) dùng scale riêng 'rsi' để tối ưu chiều ngang trên mobile
   const rsiSeries = mainChart.addLineSeries({
-    priceScaleId: 'left',
+    priceScaleId: 'rsi',
     color: '#a855f7',
     lineWidth: 2.2,
     priceLineVisible: false,
-    lastValueVisible: true,
+    lastValueVisible: false,
     title: 'RSI',
     visible: hienThiVsaRsi,
     autoscaleInfoProvider: () => ({ priceRange: { minValue: 15, maxValue: 85 } }),
   });
   if(rsiData.rsi.length){
     rsiSeries.setData(rsiData.rsi);
-    rsiSeries.createPriceLine({ price: 70, color: '#ef4444', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: '70' });
+    rsiSeries.createPriceLine({ price: 70, color: '#ef4444', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: false });
     rsiSeries.createPriceLine({ price: 50, color: '#64748b', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dotted, axisLabelVisible: false });
-    rsiSeries.createPriceLine({ price: 30, color: '#10b981', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: true, title: '30' });
+    rsiSeries.createPriceLine({ price: 30, color: '#10b981', lineWidth: 1, lineStyle: LightweightCharts.LineStyle.Dashed, axisLabelVisible: false });
   }
 
   const rsiSmaSeries = mainChart.addLineSeries({
-    priceScaleId: 'left',
+    priceScaleId: 'rsi',
     color: '#eab308',
     lineWidth: 1.2,
     priceLineVisible: false,
@@ -932,6 +929,11 @@ function veMainTradingView(tenCap){
     visible: hienThiVsaRsi,
   });
   if(rsiData.sma.length) rsiSmaSeries.setData(rsiData.sma);
+
+  mainChart.priceScale('rsi').applyOptions({
+    scaleMargins: { top: 0.70, bottom: 0.02 },
+    visible: false,
+  });
 
   vsaRsiSeriesList = [vsaVolSeries, vsaMaSeries, rsiSeries, rsiSmaSeries];
 
@@ -942,7 +944,7 @@ function veMainTradingView(tenCap){
       const isBull = pk.loai === 'BULL';
       const color = isBull ? '#00e676' : '#ff1744';
       const rsiLine = mainChart.addLineSeries({
-        priceScaleId: 'left',
+        priceScaleId: 'rsi',
         color,
         lineWidth: 2.2,
         priceLineVisible: false,
