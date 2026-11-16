@@ -77,7 +77,7 @@
   .legend-badge.ema89{background:rgba(249,115,22,0.12);color:#ea580c}
   .legend-badge.ema200{background:rgba(168,85,247,0.12);color:#9333ea}
   .legend-badge.ema610{background:rgba(225,29,72,0.12);color:#e11d48}
-  .tv-main-chart{width:100%;height:500px;position:relative}
+  .tv-main-chart{width:100%;height:620px;position:relative}
   .tv-main-chart.compact{height:380px}
   .tv-sub-header{padding:6px 12px;background:var(--mat);border-bottom:1px solid var(--vien);display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px;font-size:11.5px}
   .tv-sub-legend{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
@@ -416,11 +416,11 @@ function toggleVsaRsi(){
   vsaRsiSeriesList.forEach(s => s.applyOptions({ visible: hienThiVsaRsi }));
   if(mainChart){
     mainChart.applyOptions({
-      height: hienThiVsaRsi ? 500 : 380,
+      height: hienThiVsaRsi ? 620 : 380,
       leftPriceScale: { visible: hienThiVsaRsi },
     });
     mainChart.priceScale('right').applyOptions({
-      scaleMargins: hienThiVsaRsi ? { top: 0.03, bottom: 0.38 } : { top: 0.08, bottom: 0.08 },
+      scaleMargins: hienThiVsaRsi ? { top: 0.02, bottom: 0.48 } : { top: 0.08, bottom: 0.08 },
     });
   }
 }
@@ -626,7 +626,7 @@ function veMainTradingView(tenCap){
 
   mainChart = LightweightCharts.createChart(el, {
     width: el.clientWidth,
-    height: hienThiVsaRsi ? 500 : 380,
+    height: hienThiVsaRsi ? 620 : 380,
     layout: {
       background: { type: 'solid', color: chartBg },
       textColor: chartText,
@@ -644,13 +644,13 @@ function veMainTradingView(tenCap){
     },
     rightPriceScale: {
       borderColor: chartBorder,
-      scaleMargins: hienThiVsaRsi ? { top: 0.03, bottom: 0.38 } : { top: 0.08, bottom: 0.08 },
+      scaleMargins: hienThiVsaRsi ? { top: 0.02, bottom: 0.48 } : { top: 0.08, bottom: 0.08 },
     },
     leftPriceScale: {
       visible: hienThiVsaRsi,
       borderColor: chartBorder,
       minimumWidth: 42,
-      scaleMargins: { top: 0.82, bottom: 0.02 },
+      scaleMargins: { top: 0.70, bottom: 0.02 },
     },
     timeScale: {
       borderColor: chartBorder,
@@ -805,7 +805,7 @@ function veMainTradingView(tenCap){
   };
   setDefaultLegends();
 
-  // Tầng giữa (64% -> 80%): VSA Volume
+  // Tầng giữa (54% -> 68%): VSA Volume
   const vsaVolSeries = mainChart.addHistogramSeries({
     priceScaleId: 'vsa',
     priceFormat: { type: 'volume' },
@@ -826,20 +826,20 @@ function veMainTradingView(tenCap){
   vsaMaSeries.setData(vsaData.ma20);
 
   mainChart.priceScale('vsa').applyOptions({
-    scaleMargins: { top: 0.64, bottom: 0.20 },
+    scaleMargins: { top: 0.54, bottom: 0.32 },
     visible: false,
   });
 
-  // Tầng đáy (82% -> 98%): RSI(14) & SMA(14) gắn vào leftPriceScale
+  // Tầng đáy (70% -> 98% - cao 28%): RSI(14) & SMA(14) gắn vào leftPriceScale để soi phân kỳ
   const rsiSeries = mainChart.addLineSeries({
     priceScaleId: 'left',
     color: '#a855f7',
-    lineWidth: 1.8,
+    lineWidth: 2.2,
     priceLineVisible: false,
     lastValueVisible: true,
     title: 'RSI',
     visible: hienThiVsaRsi,
-    autoscaleInfoProvider: () => ({ priceRange: { minValue: 0, maxValue: 100 } }),
+    autoscaleInfoProvider: () => ({ priceRange: { minValue: 15, maxValue: 85 } }),
   });
   if(rsiData.rsi.length){
     rsiSeries.setData(rsiData.rsi);
