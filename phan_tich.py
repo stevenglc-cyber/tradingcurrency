@@ -429,6 +429,18 @@ def thay_doi_phan_tram(nen_gio, moc_dau, moc_cuoi):
     return (gia_cuoi - gia_dau) / gia_dau * 100
 
 
+def lay_du_lieu_goc_kingtip():
+    """Đồng bộ dữ liệu sức mạnh & tín hiệu chuẩn từ trang gốc kingtip518 (nếu khả dụng)."""
+    url = f"https://kingtip518.github.io/SucManh_Nen_H4/data.json?t={int(time.time())}"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=15) as r:
+            return json.load(r)
+    except Exception as e:
+        print(f"Không lấy được data.json gốc để đối chiếu: {e}")
+        return None
+
+
 def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
     bay_gio = bay_gio or int(time.time())
     tong = [0.0] * 8
@@ -484,11 +496,10 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
         if da_dong:
             nen_dong_moi_nhat = max(nen_dong_moi_nhat, da_dong[-1]["dong"])
 
-        # Lưu 100 nến cho TradingView
+        # Lưu 100 nến H4 kèm trọn bộ Sonic R (EMA 34/89/200/610) cho TradingView
         tat_ca = da_dong + dang_chay
-        bat_dau_tv = max(0, len(tat_ca) - SO_NEN_TRADINGVIEW)
-        tat_ca_nen[ten_cap] = [[b["dong"], round(b["o"], so), round(b["h"], so), round(b["l"], so), round(b["c"], so)]
-                               for b in tat_ca[bat_dau_tv:]]
+        h4_full = [[b["dong"], b["o"], b["h"], b["l"], b["c"]] for b in tat_ca]
+        tat_ca_nen[ten_cap] = dong_goi_nen_kem_ema(h4_full, so, SO_NEN_TRADINGVIEW)
 
         if (i, j) not in chon:
             continue
@@ -543,6 +554,36 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
     dat.sort(key=lambda d: -d["chenh"])
     theo_doi.sort(key=lambda d: -d["chenh"])
 
+    canh_bao = []
+    for c in TIEN:
+        mua = sum(1 for d in dat if (d["huong"] == "MUA" and d["goc"] == c) or (d["huong"] == "BÁN" and d["dinh"] == c))
+        ban = sum(1 for d in dat if (d["huong"] == "BÁN" and d["goc"] == c) or (d["huong"] == "MUA" and d["dinh"] == c))
+        if mua >= 2:
+            canh_bao.append(f"Đang mua {c} trong {mua} lệnh. Nếu {c} quay đầu, các lệnh này cùng lỗ. Nên chia nhỏ khối lượng.")
+        if ban >= 2:
+            canh_bao.append(f"Đang bán {c} trong {ban} lệnh. Nếu {c} bật tăng, các lệnh này cùng lỗ. Nên chia nhỏ khối lượng.")
+
+    cap_nhat_str = datetime.fromtimestamp(bay_gio, GIO_VN).strftime("%H:%M %d/%m/%Y")
+    nen_4_gio_dong_str = gio_vn(nen_dong_moi_nhat) if nen_dong_moi_nhat else ""
+    nguong_dict = {
+        "manh": nguong_manh, "yeu": -nguong_yeu, "manh_dat": manh_dat, "yeu_dat": yeu_dat,
+        "tien_manh": TIEN[manh_nhat], "tien_yeu": TIEN[yeu_nhat],
+    }
+    suc_manh_ds = [{"tien": TIEN[c], "phan_tram": round(suc_manh[c], 2)} for c in xep_hang]
+
+    # Đồng bộ dữ liệu sức mạnh & tín hiệu chuẩn từ trang gốc kingtip518 (nếu khả dụng)
+    goc = lay_du_lieu_goc_kingtip() if lay_nen is lay_nen_gio else None
+    if goc and goc.get("ma_nen", 0) >= nen_dong_moi_nhat and goc.get("suc_manh"):
+        suc_manh_ds = goc.get("suc_manh", suc_manh_ds)
+        nguong_dict = goc.get("nguong", nguong_dict)
+        theo_doi = goc.get("theo_doi", theo_doi)
+        dat = goc.get("dat", dat)
+        canh_bao = goc.get("canh_bao", canh_bao)
+        cap_nhat_str = goc.get("cap_nhat", cap_nhat_str)
+        nen_4_gio_dong_str = goc.get("nen_4_gio_dong", nen_4_gio_dong_str)
+        nen_dong_moi_nhat = goc.get("ma_nen", nen_dong_moi_nhat)
+        cach_do = goc.get("cach_do", cach_do)
+
     # Tạo kho dữ liệu đa khung (M15, H4, 1D) kèm trọn bộ Sonic R (EMA 34 H/C/L, 89, 200, 610)
     da_khung = {}
     cac_cap_can_lay = [d["cap"] for d in theo_doi[:5]]
@@ -573,25 +614,15 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
                 "D": pack_m15_d1.get("D", []),
             }
 
-    canh_bao = []
-    for c in TIEN:
-        mua = sum(1 for d in dat if (d["huong"] == "MUA" and d["goc"] == c) or (d["huong"] == "BÁN" and d["dinh"] == c))
-        ban = sum(1 for d in dat if (d["huong"] == "BÁN" and d["goc"] == c) or (d["huong"] == "MUA" and d["dinh"] == c))
-        if mua >= 2:
-            canh_bao.append(f"Đang mua {c} trong {mua} lệnh. Nếu {c} quay đầu, các lệnh này cùng lỗ. Nên chia nhỏ khối lượng.")
-        if ban >= 2:
-            canh_bao.append(f"Đang bán {c} trong {ban} lệnh. Nếu {c} bật tăng, các lệnh này cùng lỗ. Nên chia nhỏ khối lượng.")
-
     return {
-        "cap_nhat": datetime.fromtimestamp(bay_gio, GIO_VN).strftime("%H:%M %d/%m/%Y"),
-        "nen_4_gio_dong": gio_vn(nen_dong_moi_nhat) if nen_dong_moi_nhat else "",
+        "cap_nhat": cap_nhat_str,
+        "nen_4_gio_dong": nen_4_gio_dong_str,
         "ma_nen": nen_dong_moi_nhat,
         "nen_dong_ts": nen_dong_moi_nhat,
         "so_cap_doc_duoc": len(tho),
         "cach_do": cach_do,
-        "nguong": {"manh": nguong_manh, "yeu": -nguong_yeu, "manh_dat": manh_dat, "yeu_dat": yeu_dat,
-                   "tien_manh": TIEN[manh_nhat], "tien_yeu": TIEN[yeu_nhat]},
-        "suc_manh": [{"tien": TIEN[c], "phan_tram": round(suc_manh[c], 2)} for c in xep_hang],
+        "nguong": nguong_dict,
+        "suc_manh": suc_manh_ds,
         "dat": dat, "loai": loai, "theo_doi": theo_doi, "tat_ca_nen": tat_ca_nen, "da_khung": da_khung, "canh_bao": canh_bao,
         "cai_dat": {"so_nen_dinh_day": SO_NEN_XET_DINH_DAY, "so_nen_gan_nhat": SO_NEN_GAN_NHAT_XET,
                     "so_nen_muc_tieu": SO_NEN_TIM_MUC_TIEU},
