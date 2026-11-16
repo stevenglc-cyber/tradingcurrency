@@ -2,8 +2,8 @@ name: Quet nen 4 gio va suc manh tien te
 
 on:
   schedule:
-    # Chạy mỗi giờ vào phút thứ 7 từ Thứ Hai đến Thứ Sáu (giờ UTC)
-    - cron: "7 * * * 1-5"
+    # Chạy vào các phút 5, 20, 38 mỗi giờ từ Chủ Nhật đến Thứ Sáu (giờ UTC) để tránh trễ/bỏ nhịp cron
+    - cron: "5,20,38 * * * 0-5"
   workflow_dispatch:
     inputs:
       luon_gui:

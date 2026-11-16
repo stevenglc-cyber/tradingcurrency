@@ -97,6 +97,7 @@
   .cs{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:13px}
   .cs div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px dashed var(--vien);padding-bottom:4px}
   .cs span:first-child{color:var(--phu)}
+  .giaco{background:var(--mua-nen);color:var(--mua);font-size:13px;font-weight:600;border-radius:8px;padding:6px 10px}
   .cho{background:var(--canh-nen);color:var(--canh);font-size:13px;border-radius:8px;padding:8px 12px}
 
   .btn-ai{background:var(--ai-nen);color:var(--ai);border:1px solid var(--ai-vien);font-weight:600;font-size:13px;display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:9px 12px;border-radius:8px;width:100%;margin-top:2px}
@@ -221,6 +222,7 @@
 
   <section>
     <h2 id="tieuDeSucManh">Sức mạnh tiền tệ (% từ giá mở cửa ngày)</h2>
+    <p id="nguong" style="margin:4px 0 10px;color:var(--phu)"></p>
     <div class="sm" id="sucManh"></div>
   </section>
 
@@ -645,7 +647,7 @@ function veSucManh(ds){
 function veLenh(ds){
   if(!ds.length){
     $('lenh').innerHTML=`<div class="trong">
-      Trong 5 cặp mạnh – yếu, chưa cặp nào có mô hình nến đảo chiều đúng hướng. Chờ nến tiếp theo.<br>
+      Trong 5 cặp mạnh – yếu, chưa cặp nào vừa đủ ngưỡng sức mạnh (±0,30%) vừa có mô hình nến đảo chiều đúng hướng. Chờ nến tiếp theo.<br>
       👉 Anh hãy bấm nút <b>📊 Soi Chart</b> hoặc <b>🤖 Thẩm Định AI</b> ở bảng 5 cặp bên dưới để soi chi tiết từng cặp!
       <div style="margin-top:12px">
         <button class="btn-ai" style="display:inline-flex;max-width:320px" type="button" onclick="moAITheoCap(capDangChon)">🏛️ Xem Thẩm Định AI Cặp Đang Xem (${capDangChon || 'NZD/USD'})</button>
@@ -670,6 +672,7 @@ function veLenh(ds){
         <div><span>Mục tiêu (TP)</span><span class="so" style="color:var(--mua);font-weight:600">${d.muc_tieu}</span></div>
         <div><span>Lời/lỗ</span><span class="so">1:${so(d.loi_lo)}</span></div>
       </div>
+      ${d.h1?`<div class="giaco">➕ Gia cố: ${d.h1}</div>`:''}
       ${d.gia_cho?`<div class="cho">Nên chờ giá hồi về <b class="so">${d.gia_cho}</b> để lời/lỗ đạt 1:1,5</div>`:''}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px">
         <button class="btn-ai" style="margin:0;padding:8px" type="button" onclick="moAI(${k})">🤖 Thẩm Định AI</button>
@@ -779,9 +782,11 @@ function veLoai(ds){
     const chenhHtml = `<span class="so chenh-duong">+${so(chenhVal.toFixed(2))}%</span>`;
     const trangThai = d.trang_thai || d.mo_hinh || 'Chờ mô hình';
     const coMoHinh = trangThai !== 'Chưa có mô hình đảo chiều' && trangThai !== 'Chờ mô hình';
-    const ttHtml = coMoHinh 
-      ? `<b style="color:var(--mua)">✅ ${trangThai}</b>` 
-      : `<span style="color:var(--phu)">Chờ mô hình</span>`;
+    const ttHtml = d.du_nguong === false
+      ? `<span style="color:var(--phu)">⛔ Sức mạnh chưa đủ ngưỡng${coMoHinh ? ' (có ' + trangThai + ')' : ''}</span>`
+      : (coMoHinh
+        ? `<b style="color:var(--mua)">✅ ${trangThai}</b>`
+        : `<span style="color:var(--phu)">Chờ mô hình</span>`);
     return `<tr>
       <td><b>${d.cap}</b></td>
       <td>${badge}</td>
@@ -919,6 +924,8 @@ async function tai(){
     $('trangthai').textContent=`Cập nhật ${d.cap_nhat} · nến 4 giờ vừa đóng lúc ${d.nen_4_gio_dong} (GMT+7) · đọc được ${d.so_cap_doc_duoc}/28 cặp`;
     $('mau').hidden=!d.du_lieu_mau;
     $('tieuDeSucManh').textContent='Sức mạnh tiền tệ (% '+(d.cach_do||'từ giá mở cửa ngày')+')';
+    const ng=d.nguong;
+    if($('nguong')) $('nguong').innerHTML=ng?`Ngưỡng sức mạnh: <b>${ng.tien_manh}</b> cần ≥ ${ng.manh>0?'+':''}${so(ng.manh.toFixed(2))}% ${ng.manh_dat?'✅':'❌'} · <b>${ng.tien_yeu}</b> cần ≤ ${so(ng.yeu.toFixed(2))}% ${ng.yeu_dat?'✅':'❌'}`:'';
     veSucManh(d.suc_manh); 
     veLenh(d.dat); 
     veLoai(d.theo_doi || d.loai || []);
@@ -928,7 +935,10 @@ async function tai(){
     $('khuCanhBao').hidden=!(d.canh_bao&&d.canh_bao.length);
     $('canhBao').innerHTML=(d.canh_bao||[]).map(c=>`<li>${c}</li>`).join('');
     const c=d.cai_dat||{};
-    if(c.so_nen_gan_nhat){$('cdGan').textContent=c.so_nen_gan_nhat;$('cdDinh').textContent=c.so_nen_dinh_day;$('cdChenh').textContent=so(c.chenh_toi_thieu);$('cdMuc').textContent=c.so_nen_muc_tieu;}
+    if(c.so_nen_gan_nhat && $('cdGan')) $('cdGan').textContent=c.so_nen_gan_nhat;
+    if(c.so_nen_dinh_day && $('cdDinh')) $('cdDinh').textContent=c.so_nen_dinh_day;
+    if(c.chenh_toi_thieu!==undefined && $('cdChenh')) $('cdChenh').textContent=so(c.chenh_toi_thieu);
+    if(c.so_nen_muc_tieu && $('cdMuc')) $('cdMuc').textContent=c.so_nen_muc_tieu;
   }catch(e){
     $('trangthai').textContent='Không đọc được dữ liệu. Bấm Tải lại sau ít phút.';
   }
