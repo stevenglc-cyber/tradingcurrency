@@ -619,14 +619,25 @@ def phan_tich(lay_nen=lay_nen_gio, bay_gio=None):
     }
 
 
-def soan_tin_tom_tat(kq):
+def soan_tin_tom_tat(kq, tin_hieu_moi=False):
     """Tin nhắn văn bản ngắn gọn, có thể gửi độc lập khi không vẽ được biểu đồ."""
     dong_sm = []
     for x in kq["suc_manh"]:
         dau = "+" if x["phan_tram"] > 0 else ""
         dong_sm.append(f"{x['tien']}: {dau}{x['phan_tram']:.2f}%")
-    t = [f"<b>BÀN GHÉP CẶP H4 & TRADINGAGENTS AI</b>",
-         f"Nến đóng lúc <b>{kq['nen_4_gio_dong']}</b>", "",
+
+    if tin_hieu_moi:
+        tieu_de = [
+            "⚡ <b>TÍN HIỆU VÀO LỆNH MỚI (REALTIME)</b>",
+            f"Kích hoạt lúc: <b>{kq['cap_nhat']}</b> · Nến 4H: <b>{kq['nen_4_gio_dong']}</b>"
+        ]
+    else:
+        tieu_de = [
+            "📊 <b>BÀN GHÉP CẶP H4 & TRADINGAGENTS AI</b>",
+            f"Nến 4H đóng lúc: <b>{kq['nen_4_gio_dong']}</b>"
+        ]
+
+    t = tieu_de + ["",
          f"<b>Sức mạnh tiền tệ</b> ({kq['cach_do']})",
          "<pre>" + "\n".join(dong_sm) + "</pre>"]
     ng = kq.get("nguong")
@@ -818,10 +829,13 @@ def doc_du_lieu_mau():
 
 def main():
     cu_ma_nen = 0
+    cu_dat = []
     if os.path.exists(FILE_DATA):
         try:
             with open(FILE_DATA, "r", encoding="utf-8") as f:
-                cu_ma_nen = json.load(f).get("ma_nen", 0)
+                cu_json = json.load(f)
+                cu_ma_nen = cu_json.get("ma_nen", 0) or cu_json.get("nen_dong_ts", 0)
+                cu_dat = cu_json.get("dat", [])
         except Exception:
             pass
     print("Bắt đầu quét 28 cặp tiền tệ...")
@@ -841,14 +855,27 @@ def main():
         json.dump(kq, f, ensure_ascii=False, indent=2)
     print(f"Đã cập nhật {FILE_DATA}")
 
-    # Kiểm tra xem có nến 4 giờ mới đóng không
+    # 1. Kiểm tra nến 4 giờ mới đóng
     nen_cu = max(doc_lich_su_nen(), cu_ma_nen)
     nen_moi = kq.get("nen_dong_ts", 0)
     co_nen_moi = nen_moi > nen_cu
 
+    # 2. Kiểm tra có kèo đạt chuẩn mới xuất hiện (giữa phiên) hay không
+    def tao_chu_ky(d):
+        return f"{d.get('cap')}_{d.get('huong')}_{d.get('mo_hinh')}_{d.get('gio_nen')}"
+
+    cu_chu_ky = {tao_chu_ky(d) for d in cu_dat}
+    moi_chu_ky = {tao_chu_ky(d) for d in kq.get("dat", [])}
+    co_keo_moi = any(sig not in cu_chu_ky for sig in moi_chu_ky)
+
+    tin_hieu_moi_realtime = (not co_nen_moi) and co_keo_moi
+    can_gui = co_nen_moi or co_keo_moi or LUON_GUI
+
     print(f"Nến vừa đóng: {kq['nen_4_gio_dong']} (ts={nen_moi}), nến đã gửi lần trước: ts={nen_cu}")
-    if not co_nen_moi and not LUON_GUI:
-        print("Chưa có nến 4 giờ mới, không gửi Telegram.")
+    print(f"Trạng thái: co_nen_moi={co_nen_moi}, co_keo_moi={co_keo_moi}, LUON_GUI={LUON_GUI} => can_gui={can_gui}")
+
+    if not can_gui:
+        print("Chưa có nến 4 giờ mới và không có kèo mới xuất hiện, không gửi Telegram.")
         return
 
     # Vẽ biểu đồ cho các lệnh đạt chuẩn
@@ -861,7 +888,7 @@ def main():
         except Exception as e:
             print(f"Lỗi vẽ biểu đồ {d['cap']}: {e}")
 
-    tin = soan_tin_tom_tat(kq)
+    tin = soan_tin_tom_tat(kq, tin_hieu_moi=tin_hieu_moi_realtime)
     print("Nội dung gửi Telegram:\n" + tin)
     if gui_telegram(tin, anh_ds):
         print("Đã gửi báo cáo Telegram thành công.")
