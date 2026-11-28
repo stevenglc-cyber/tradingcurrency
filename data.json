@@ -1,8 +1,8 @@
 {
-  "cap_nhat": "08:05 28/11/2026",
-  "nen_4_gio_dong": "05:00 28/11",
-  "ma_nen": 1795816800,
-  "nen_dong_ts": 1795816800,
+  "cap_nhat": "09:05 28/11/2026",
+  "nen_4_gio_dong": "09:00 28/11",
+  "ma_nen": 1795831200,
+  "nen_dong_ts": 1795831200,
   "so_cap_doc_duoc": 28,
   "cach_do": "từ giá mở cửa ngày",
   "nguong": {
@@ -55,14 +55,14 @@
       "huong": "BÁN",
       "chenh": 0.05,
       "du_nguong": false,
-      "trang_thai": "nhấn chìm giảm"
+      "trang_thai": "Chưa có mô hình đảo chiều"
     },
     {
       "cap": "NZD/CAD",
       "huong": "BÁN",
       "chenh": 0.04,
       "du_nguong": false,
-      "trang_thai": "sao hôm"
+      "trang_thai": "Chưa có mô hình đảo chiều"
     },
     {
       "cap": "EUR/NZD",
@@ -76,7 +76,7 @@
       "huong": "BÁN",
       "chenh": 0.03,
       "du_nguong": false,
-      "trang_thai": "nhấn chìm giảm"
+      "trang_thai": "Chưa có mô hình đảo chiều"
     },
     {
       "cap": "CHF/JPY",
